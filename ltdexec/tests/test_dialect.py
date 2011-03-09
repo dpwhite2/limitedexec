@@ -13,7 +13,7 @@ class Dialect_TestCase(LtdExec_TestCaseBase):
         dialect = Dialect()
         # same object must be returned
         self.assertEquals(dialect, Dialect())
-        
+
         self.assertEquals(None, Dialect.Processor)
         self.assertEquals(None, Dialect.SourceValidator)
         self.assertEquals(None, Dialect.SourceTransform)
@@ -21,7 +21,7 @@ class Dialect_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(None, Dialect.AstTransform)
         self.assertEquals(None, Dialect.EnvironmentFactory)
         self.assertEquals(None, Dialect.Compiler)
-    
+
     def test_flags(self):
         self.assertEquals(False, Dialect.allow_statement_import)
         self.assertEquals(True, Dialect.allow_statement_def)
@@ -57,23 +57,23 @@ class Dialect_TestCase(LtdExec_TestCaseBase):
         self.assertTrue(hasattr(AutoAstValidator, 'visit_ImportFrom'))
         self.assertTrue(hasattr(AutoAstValidator, 'visit_Exec'))
         self.assertTrue(hasattr(AutoAstValidator, 'visit_Delete'))
-        
+
     def test_create_classes(self):
         SourceTransform = Dialect().SourceTransform
         self.assertTrue(isinstance(SourceTransform, type))
         self.assertEquals(SourceTransform, Dialect().SourceTransform)
-        
+
         SourceValicator = Dialect().SourceValidator
         self.assertTrue(isinstance(SourceValicator, type))
         self.assertEquals(SourceValicator, Dialect().SourceValidator)
-        
+
         AstTransform = Dialect().AstTransform
         self.assertTrue(isinstance(AstTransform, type))
         self.assertEquals(AstTransform, Dialect().AstTransform)
-        
+
         Processor = Dialect().Processor
         self.assertTrue(isinstance(Processor, type))
-        
+
     def test_dialect_name(self):
         self.assertEquals('ltdexec.dialect.base.Dialect', Dialect.name)
 
@@ -105,10 +105,10 @@ class EmptyCustomDialect_TestCase(LtdExec_TestCaseBase):
                           self.MyDialect.forbidden_attrs_set)
         self.assertEquals(set(), self.MyDialect.unassignable_names_set)
         self.assertEquals(set(), self.MyDialect.unassignable_attrs_set)
-        
+
     def test_dialect_name(self):
         self.assertEquals('ltdexec.tests.test_dialect.MyDialect', self.MyDialect.name)
-        
+
 #==============================================================================#
 class CustomDialect_TestCase(LtdExec_TestCaseBase):
     def test_parent_flag(self):
@@ -155,4 +155,3 @@ class CustomDialect_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(True, MyDialect.allow_expression_lambda)
 
 #==============================================================================#
-

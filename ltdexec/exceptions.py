@@ -5,7 +5,7 @@ import exceptions
 #==============================================================================#
 class Exception(exceptions.Exception):
     pass
-    
+
 
 class SyntaxError(exceptions.SyntaxError, Exception):
     def __init__(self, msg, filename, lineno, offset, text, reason=None):
@@ -23,5 +23,4 @@ class InternalError(Exception):
 
 
 #==============================================================================#
-
 

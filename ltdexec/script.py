@@ -9,7 +9,7 @@ class Result(object):
         self.exception = None
         self.globals = {}
         self.locals = {}
-    
+
 
 #==============================================================================#
 class Script(object):
@@ -23,7 +23,7 @@ class Script(object):
     def run(self, globals=None, locals=None):
         globals = globals or {}
         locals = locals or {}
-        
+
         with self.env_factory(globals, locals) as env:
             res = Result()
             try:
@@ -34,10 +34,9 @@ class Script(object):
                 pass
             res.globals = env.globals.copy()
             res.locals = env.locals.copy()
-        
+
         return res
 
 
 #==============================================================================#
-
 

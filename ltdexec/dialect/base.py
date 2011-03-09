@@ -27,7 +27,7 @@ class Dialect(_DialectBase):
     AstTransform = None
     EnvironmentFactory = None
     Compiler = None
-    
+
     def __init__(self):
         ##print 'creating Dialect.'
         self.Processor = self.Processor or processor.Processor
@@ -39,15 +39,14 @@ class Dialect(_DialectBase):
         compiler_cls = self.Compiler or compiler.Compiler
         self.compiler = compiler_cls(self)
         self.objects = self.objects.copy()
-        
+
     @classmethod
     def compile(cls, src, filename):
         dialect = registry.dialects[cls.name]
         return dialect.compiler(src, filename)
-    
+
 
 
 
 
 #==============================================================================#
-

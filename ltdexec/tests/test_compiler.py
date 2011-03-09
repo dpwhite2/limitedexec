@@ -14,4 +14,3 @@ class Compiler_DoCompile_TestCase(LtdExec_TestCaseBase):
         self.assertTrue(isinstance(co, types.CodeType))
 
 #==============================================================================#
-

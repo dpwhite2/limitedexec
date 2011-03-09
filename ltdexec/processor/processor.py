@@ -59,4 +59,3 @@ class SplitSourceProcessor(Processor):
 
 
 
-

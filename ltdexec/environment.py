@@ -11,7 +11,7 @@ class Environment(object):
             for name,objdef in objects.iteritems():
                 _globals[name] = objdef.construct()
             _globals.update(globals)
-            
+
             self.globals = _globals
             self.locals = locals
             self.modules = {}
@@ -19,7 +19,7 @@ class Environment(object):
             wrapper.pop_envkey(self.key)
             raise
         # TODO: put custom import function into globals
-        
+
     def close(self):
         key = self.key
         try:
@@ -30,8 +30,8 @@ class Environment(object):
                     pass
         finally:
             wrapper.pop_envkey(key)
-        
-        
+
+
     def __enter__(self):
         pass
     def __exit__(self, exc_type, exc_value, traceback):
@@ -56,7 +56,6 @@ class EnvironmentFactory(object):
 
 
 #==============================================================================#
-
 
 
 

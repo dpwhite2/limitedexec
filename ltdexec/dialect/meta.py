@@ -66,7 +66,7 @@ class Builder(object):
         self.check_flag(flag, name, 'forbidden_attrs')
 
     def set_flag(self, traits):
-        """ Scans the parent flags for a value.  Note: this is different than 
+        """ Scans the parent flags for a value.  Note: this is different than
             checking base classes. """
         for parentname in traits.parents:
             if parentname in self.attrs:
@@ -80,12 +80,12 @@ class Builder(object):
             self.attrs["name"] = '.'.join([sys.modules[module].__name__, self.clsname])
 
     def process_flags(self):
-        """ Checks all known leaf flags to see if they are set.  
-            
-            It will look at parent flags for a value when it finds a flag that 
-            is not set.  If a flag is not set, and no parent flags are set, 
-            then nothing is done here.  This lets allows the flag value to be 
-            picked up using Python's normal inheritence mechanism. 
+        """ Checks all known leaf flags to see if they are set.
+
+            It will look at parent flags for a value when it finds a flag that
+            is not set.  If a flag is not set, and no parent flags are set,
+            then nothing is done here.  This lets allows the flag value to be
+            picked up using Python's normal inheritence mechanism.
         """
         for traits in config.flags.leafflag_traits.itervalues():
             if traits.name not in self.attrs:
@@ -138,7 +138,7 @@ class DialectMeta(type):
         langd = registry.dialects[langd.name].__class__
 
         return langd
-        
+
     def __call__(cls, *args, **kwargs):
         if cls.name not in registry.dialects:
             return super(DialectMeta, cls).__call__(*args, **kwargs)
