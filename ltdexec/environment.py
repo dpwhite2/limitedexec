@@ -8,7 +8,7 @@ class Environment(object):
         self.key = wrapper.create_envkey()
         try:
             _globals = {}
-            for name,objdef in objects.iteritems():
+            for name, objdef in objects.iteritems():
                 _globals[name] = objdef.construct()
             _globals.update(globals)
 
@@ -23,7 +23,7 @@ class Environment(object):
     def close(self):
         key = self.key
         try:
-            for name,obj in self.globals:
+            for name, obj in self.globals:
                 try:
                     obj._LX_unlock(key)
                 except AttributeError:
@@ -52,7 +52,7 @@ class EnvironmentFactory(object):
             self.objects = {}
 
     def __call__(self, globals, locals):
-        return self.Environment(self.objects, _globals, locals)
+        return self.Environment(self.objects, globals, locals)
 
 
 #==============================================================================#

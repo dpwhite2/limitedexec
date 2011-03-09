@@ -32,7 +32,7 @@ class Builder(object):
                 return getattr(base, attrname)
             except AttributeError:
                 pass
-        if default=='throw':
+        if default == 'throw':
             m = 'Attribute "{0}" could not be inherited.'.format(attrname)
             raise exceptions.InternalError(m)
         else:
@@ -77,7 +77,8 @@ class Builder(object):
         """ Set class default values if they are not defined. """
         if not self.attrs.get("name"):
             module = self.attrs["__module__"]
-            self.attrs["name"] = '.'.join([sys.modules[module].__name__, self.clsname])
+            self.attrs["name"] = '.'.join([sys.modules[module].__name__, 
+                                          self.clsname])
 
     def process_flags(self):
         """ Checks all known leaf flags to see if they are set.
@@ -92,38 +93,48 @@ class Builder(object):
                 self.set_flag(traits)
 
     def forbidden_names(self):
-        self.set_name_list('forbidden_names', config.names.DEFAULT_FORBIDDEN_NAMES)
+        DEFAULT_FORBIDDEN_NAMES = config.names.DEFAULT_FORBIDDEN_NAMES
+        self.set_name_list('forbidden_names', DEFAULT_FORBIDDEN_NAMES)
 
         for traits in config.flags.builtin_leafflag_traits.itervalues():
             self.check_builtin_flag(traits.name, traits.builtin_name)
 
         self.attrs['forbidden_names_set'] = set(self.attrs['forbidden_names'])
-        self.attrs['forbidden_names_set'].update(config.names.ALWAYS_FORBIDDEN_NAMES)  # ALWAYS_FORBIDDEN_NAMES = internal names
+        ALWAYS_FORBIDDEN_NAMES = config.names.ALWAYS_FORBIDDEN_NAMES
+        self.attrs['forbidden_names_set'].update(ALWAYS_FORBIDDEN_NAMES)
 
     def forbidden_attrs(self):
-        self.set_name_list('forbidden_attrs', config.names.DEFAULT_FORBIDDEN_ATTRS)
+        DEFAULT_FORBIDDEN_ATTRS = config.names.DEFAULT_FORBIDDEN_ATTRS
+        self.set_name_list('forbidden_attrs', DEFAULT_FORBIDDEN_ATTRS)
 
         for traits in config.flags.attribute_leafflag_traits.itervalues():
             self.check_attribute_flag(traits.name, traits.attr_name)
 
         self.attrs['forbidden_attrs_set'] = set(self.attrs['forbidden_attrs'])
-        self.attrs['forbidden_attrs_set'].update(config.names.ALWAYS_FORBIDDEN_ATTRS)  # ALWAYS_FORBIDDEN_ATTRS = internal attributes
+        ALWAYS_FORBIDDEN_ATTRS = config.names.ALWAYS_FORBIDDEN_ATTRS
+        self.attrs['forbidden_attrs_set'].update(ALWAYS_FORBIDDEN_ATTRS)
 
     def unassignable_names(self):
-        self.set_name_list('unassignable_names', config.names.DEFAULT_UNASSIGNABLE_NAMES)
+        DEFAULT_UNASSIGNABLE_NAMES = config.names.DEFAULT_UNASSIGNABLE_NAMES
+        self.set_name_list('unassignable_names', DEFAULT_UNASSIGNABLE_NAMES)
 
         objects = self.attrs.get('objects', self.inherit_value('objects', None))
         if objects:
             self.attrs['unassignable_names'].extend(objects.keys())
 
-        self.attrs['unassignable_names_set'] = set(self.attrs['unassignable_names'])
-        self.attrs['unassignable_names_set'].update(config.names.ALWAYS_UNASSIGNABLE_NAMES)
+        self.attrs['unassignable_names_set'] = \
+                set(self.attrs['unassignable_names'])
+        ALWAYS_UNASSIGNABLE_NAMES = config.names.ALWAYS_UNASSIGNABLE_NAMES
+        self.attrs['unassignable_names_set'].update(ALWAYS_UNASSIGNABLE_NAMES)
 
     def unassignable_attrs(self):
-        self.set_name_list('unassignable_attrs', config.names.DEFAULT_UNASSIGNABLE_ATTRS)
+        DEFAULT_UNASSIGNABLE_ATTRS = config.names.DEFAULT_UNASSIGNABLE_ATTRS
+        self.set_name_list('unassignable_attrs', DEFAULT_UNASSIGNABLE_ATTRS)
 
-        self.attrs['unassignable_attrs_set'] = set(self.attrs['unassignable_attrs'])
-        self.attrs['unassignable_attrs_set'].update(config.names.ALWAYS_UNASSIGNABLE_ATTRS)
+        self.attrs['unassignable_attrs_set'] = \
+                set(self.attrs['unassignable_attrs'])
+        ALWAYS_UNASSIGNABLE_ATTRS = config.names.ALWAYS_UNASSIGNABLE_ATTRS
+        self.attrs['unassignable_attrs_set'].update(ALWAYS_UNASSIGNABLE_ATTRS)
 
 
 #==============================================================================#

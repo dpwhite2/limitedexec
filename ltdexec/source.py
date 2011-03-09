@@ -2,11 +2,11 @@
 
 class Source(object):
     def __init__(self, source, filename):
-        self.lines = source.splitlines()
+        self.lines = source.splitlines() or ['']
         self.filename = filename
 
     def __len__(self):
-        return len(lines)
+        return len(self.lines)
 
     def __getitem__(self, lineno):
         """ One-based index into the lines of the source file.
@@ -18,6 +18,7 @@ class Source(object):
             Negative indexes are interpreted in the normal Python manner.
         """
         if isinstance(lineno, slice):
+            start, stop = None, None
             if lineno.start > 0:
                 start = lineno.start - 1
             elif lineno.start == 0:
@@ -41,7 +42,7 @@ class Source(object):
         return '\n'.join(self.lines)
 
     def __repr__(self):
-        return '<Source: filename={0}, lines={1}>'.format(filename, len(self.lines))
+        return '<Source: filename={0}, lines={1}>'.format(self.filename, len(self.lines))
 
 
 

@@ -29,10 +29,12 @@ class BaseCompiler(object):
         return script
 
     def compile_to_ast(self, src, filename):
-        return __builtin__.compile(src, filename, 'exec', flags=ast.PyCF_ONLY_AST)
+        return __builtin__.compile(src, filename, 'exec', 
+                                   flags=ast.PyCF_ONLY_AST)
 
     def compile_to_code(self, ast_tree, filename):
-        # TODO: if root is Module, compile using 'exec'; if root is Expression, compile using 'eval'
+        # TODO: if root is Module, compile using 'exec'; 
+        #       if root is Expression, compile using 'eval'
         return __builtin__.compile(ast_tree, filename, 'exec')
 
     def script_factory(self, source, code):
