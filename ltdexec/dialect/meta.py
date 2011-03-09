@@ -1,6 +1,9 @@
 import sys
 
+
+from . import registry
 from .. import config
+from .. import exceptions
 
 #==============================================================================#
 class Builder(object):
@@ -30,7 +33,8 @@ class Builder(object):
             except AttributeError:
                 pass
         if default=='throw':
-            raise RuntimeError('Attribute "{0}" could not be inherited.'.format(attrname))
+            m = 'Attribute "{0}" could not be inherited.'.format(attrname)
+            raise exceptions.InternalError(m)
         else:
             return default
 
@@ -62,6 +66,8 @@ class Builder(object):
         self.check_flag(flag, name, 'forbidden_attrs')
 
     def set_flag(self, traits):
+        """ Scans the parent flags for a value.  Note: this is different than 
+            checking base classes. """
         for parentname in traits.parents:
             if parentname in self.attrs:
                 self.attrs[traits.name] = self.attrs[parentname]
@@ -74,6 +80,13 @@ class Builder(object):
             self.attrs["name"] = '.'.join([sys.modules[module].__name__, self.clsname])
 
     def process_flags(self):
+        """ Checks all known leaf flags to see if they are set.  
+            
+            It will look at parent flags for a value when it finds a flag that 
+            is not set.  If a flag is not set, and no parent flags are set, 
+            then nothing is done here.  This lets allows the flag value to be 
+            picked up using Python's normal inheritence mechanism. 
+        """
         for traits in config.flags.leafflag_traits.itervalues():
             if traits.name not in self.attrs:
                 self.set_flag(traits)
@@ -121,8 +134,15 @@ class DialectMeta(type):
         attrs = builder()
         langd = new(mcls, clsname, bases, attrs)
 
-        # TODO: register LangDescriptor
+        registry.dialects.register(langd)
+        langd = registry.dialects[langd.name].__class__
 
         return langd
+        
+    def __call__(cls, *args, **kwargs):
+        if cls.name not in registry.dialects:
+            return super(DialectMeta, cls).__call__(*args, **kwargs)
+        else:
+            return registry.dialects[cls.name]
 
 #==============================================================================#

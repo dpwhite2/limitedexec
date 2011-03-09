@@ -1,11 +1,15 @@
 from .meta import DialectMeta
+from . import registry
 from ..config.flags import leafflag_traits
 from ..processor import validator, transform, processor
+from .. import compiler, environment
 
 
 #==============================================================================#
 class _DialectBase(object):
-    pass
+    allowed_imports = {}
+    forbidden_imports = {}
+    objects = {}
 
 # Set flag defaults in _DialectBase.
 for traits in leafflag_traits.itervalues():
@@ -16,65 +20,34 @@ for traits in leafflag_traits.itervalues():
 class Dialect(_DialectBase):
     __metaclass__ = DialectMeta
 
-    Processor = processor.Processor
-    SourceValidator = validator.SourceValidator
-    SourceTransform = transform.SourceTransform
+    Processor = None
+    SourceValidator = None
+    SourceTransform = None
     AstValidator = None
-    AstTransform = transform.AstTransform
-
+    AstTransform = None
+    EnvironmentFactory = None
+    Compiler = None
+    
+    def __init__(self):
+        ##print 'creating Dialect.'
+        self.Processor = self.Processor or processor.Processor
+        self.SourceValidator = self.SourceValidator or validator.SourceValidator
+        self.SourceTransform = self.SourceTransform or transform.SourceTransform
+        self.AstValidator = self.AstValidator or validator.create_ast_validator_class(self)
+        self.AstTransform = self.AstTransform or transform.AstTransform
+        self.EnvironmentFactory = self.EnvironmentFactory or environment.EnvironmentFactory
+        compiler_cls = self.Compiler or compiler.Compiler
+        self.compiler = compiler_cls(self)
+        self.objects = self.objects.copy()
+        
     @classmethod
-    def source_transform_class(cls):
-        if not cls.SourceTransform:
-            cls.SourceTransform = cls.create_source_transform_class()
-        return cls.SourceTransform
+    def compile(cls, src, filename):
+        dialect = registry.dialects[cls.name]
+        return dialect.compiler(src, filename)
+    
 
-    @classmethod
-    def create_source_transform_class(cls):
-        raise NotImplementedError()
 
-    @classmethod
-    def ast_transform_class(cls):
-        if not cls.AstTransform:
-            cls.AstTransform = cls.create_ast_transform_class()
-        return cls.AstTransform
-
-    @classmethod
-    def create_ast_transform_class(cls):
-        raise NotImplementedError()
-
-    @classmethod
-    def source_validator_class(cls):
-        if not cls.SourceValidator:
-            cls.SourceValidator = cls.create_source_validator_class()
-        return cls.SourceValidator
-
-    @classmethod
-    def create_source_validator_class(cls):
-        raise NotImplementedError()
-
-    @classmethod
-    def ast_validator_class(cls):
-        if not cls.AstValidator:
-            cls.AstValidator = cls.create_ast_validator_class()
-        return cls.AstValidator
-
-    @classmethod
-    def create_ast_validator_class(cls):
-        return validator.create_ast_validator_class(cls)
-
-    @classmethod
-    def compiler_instance(cls):
-        try:
-            return cls._compiler_instance
-        except AttributeError:
-            cls._compiler_instance = cls.create_compiler()
-            return cls._compiler_instance
-
-    @classmethod
-    def create_compiler(cls):
-        pass
 
 
 #==============================================================================#
-
 

@@ -1,50 +1,60 @@
 
 class Processor(object):
     def __init__(self, dialect):
-        self.SourceValidator = dialect.source_validator_class()
-        self.SourceTransform = dialect.source_transform_class()
-        self.AstValidator = dialect.ast_validator_class()
-        self.AstTransform = dialect.ast_transform_class()
+        self.dialect = dialect
+        self.SourceValidator = dialect.SourceValidator
+        self.SourceTransform = dialect.SourceTransform
+        self.AstValidator = dialect.AstValidator
+        self.AstTransform = dialect.AstTransform
 
     def process_source(self, source):
-        validator = self.SourceValidator()
-        transform = self.SourceTransform()
-        return transform(source, validator)
+        validator = self.SourceValidator(self.dialect)
+        transform = self.SourceTransform(self.dialect)
+        source = transform.precheck_transform(source)
+        validator(source)
+        source = transform.postcheck_transform(source)
+        return source
 
     def process_ast(self, ast_tree):
-        validator = self.AstValidator()
-        transform = self.AstTransform()
-        return transform(ast_tree, validator)
+        validator = self.AstValidator(self.dialect)
+        transform = self.AstTransform(self.dialect)
+        ast_tree = transform.precheck_transform(ast_tree)
+        validator(ast_tree)
+        ast_tree = transform.postcheck_transform(ast_tree)
+        return ast_tree
 
 
-class MultiProcessor(Processor):
+class SplitSourceProcessor(Processor):
     def __init__(self, dialect):
-        super(MultiProcessor, self).__init__(dialect)
-        self.WholeSourceValidator = dialect.whole_source_validator_class()
-        self.WholeSourceTransform = dialect.whole_source_transform_class()
-        self.SourceSplitter = dialect.source_splitter_class()
-        self.AstMerger = dialect.ast_merger_class()
-        self.MergedAstValidator = dialect.merged_ast_validator_class()
-        self.MergedAstTransform = dialect.merged_ast_transform_class()
+        super(SplitSourceProcessor, self).__init__(dialect)
+        self.WholeSourceValidator = dialect.WholeSourceValidator
+        self.WholeSourceTransform = dialect.WholeSourceTransform
+        self.SourceSplitter = dialect.SourceSplitter
+        self.AstMerger = dialect.AstMerger
+        self.MergedAstValidator = dialect.MergedAstValidator
+        self.MergedAstTransform = dialect.MergedAstTransform
 
     def process_whole_source(self, source):
-        validator = self.WholeSourceValidator()
-        transform = self.WholeSourceTransform()
-        return transform(source, validator)
+        validator = self.WholeSourceValidator(self.dialect)
+        transform = self.WholeSourceTransform(self.dialect)
+        source = transform.precheck_transform(source)
+        validator(source)
+        source = transform.postcheck_transform(source)
+        return source
 
     def split_source(self, source):
-        splitter = self.SourceSplitter()
-        return splitter(source)
+        return self.SourceSplitter()(source)
 
     def merge_asts(self, trees):
-        merger = self.AstMerger()
-        return merger(trees)
+        return self.AstMerger()(trees)
 
     def process_merged_ast(self, ast_tree):
-        validator = self.MergedAstValidator()
-        transform = self.MergedAstTransform()
-        return transform(ast_tree, validator)
-
+        validator = self.MergedAstValidator(self.dialect)
+        transform = self.MergedAstTransform(self.dialect)
+        ast_tree = transform.precheck_transform(ast_tree)
+        validator(ast_tree)
+        ast_tree = transform.postcheck_transform(ast_tree)
+        return ast_tree
 
 
 

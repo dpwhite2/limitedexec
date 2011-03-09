@@ -1,10 +1,8 @@
 
 
 class TransformBase(object):
-    def __call__(self, data, validator):
-        data = self.precheck_transform(data)
-        validator(data)
-        return self.postcheck_transform(data)
+    def __init__(self, dialect):
+        self.dialect = dialect
 
     def precheck_transform(self, data):
         return data

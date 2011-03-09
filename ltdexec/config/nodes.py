@@ -7,7 +7,7 @@ node_traits = [
     T('Module','mod',False,''),
     T('Interactive','mod',False,''),
     T('Expression','mod',False,''),
-    
+
     T('FunctionDef','stmt',True,'function definition statement'),
     T('ClassDef','stmt',True,'class definition statement'),
     T('Return','stmt',True,'return statement'),
@@ -32,7 +32,7 @@ node_traits = [
     T('Pass','stmt',True,'pass statement'),
     T('Break','stmt',True,'break statement'),
     T('Continue','stmt',True,'continue statement'),
-    
+
     T('BoolOp','expr',False,'boolean operator expression'),
     T('BinOp','expr',False,'binary operator expression'),
     T('UnaryOp','expr',False,'unary operator expression'),
@@ -57,19 +57,19 @@ node_traits = [
     T('Name','expr',False,'identifier'),
     T('List','expr',False,'list expression'),
     T('Tuple','expr',False,'tuple expression'),
-    
+
     T('Load','expr_context',False,''),
     T('Store','expr_context',False,''),
     T('Del','expr_context',False,''),
     T('AugLoad','expr_context',False,''),
     T('AugStore','expr_context',False,''),
     T('Param','expr_context',False,''),
-    
+
     T('Ellipsis','slice',False,'ellipsis'),
     T('Slice','slice',False,'slice'),
     T('ExtSlice','slice',False,'extended slice'),
     T('Index','slice',False,''),
-    
+
     T('And','boolop',False,''),
     T('Or','boolop',False,''),
     T('Add','operator',False,''),
@@ -98,14 +98,13 @@ node_traits = [
     T('IsNot','cmpop',False,''),
     T('In','cmpop',False,''),
     T('NotIn','cmpop',False,''),
-    
+
     T('ExceptionHandler','excepthandler',False,'exception handler'),
 ]
 
 node_traits = dict((t.name, t) for t in node_traits)
 
 del T
-
 
 
 

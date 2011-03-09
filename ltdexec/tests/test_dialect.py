@@ -1,10 +1,27 @@
 import unittest
 
-import ltdexec.dialect.meta
 from ltdexec.dialect.base import Dialect
 from ltdexec.processor.validator import AstValidator
 
-class Dialect_TestCase(unittest.TestCase):
+from .base import LtdExec_TestCaseBase
+
+
+#==============================================================================#
+class Dialect_TestCase(LtdExec_TestCaseBase):
+
+    def test_basic(self):
+        dialect = Dialect()
+        # same object must be returned
+        self.assertEquals(dialect, Dialect())
+        
+        self.assertEquals(None, Dialect.Processor)
+        self.assertEquals(None, Dialect.SourceValidator)
+        self.assertEquals(None, Dialect.SourceTransform)
+        self.assertEquals(None, Dialect.AstValidator)
+        self.assertEquals(None, Dialect.AstTransform)
+        self.assertEquals(None, Dialect.EnvironmentFactory)
+        self.assertEquals(None, Dialect.Compiler)
+    
     def test_flags(self):
         self.assertEquals(False, Dialect.allow_statement_import)
         self.assertEquals(True, Dialect.allow_statement_def)
@@ -12,38 +29,64 @@ class Dialect_TestCase(unittest.TestCase):
         self.assertEquals(True, Dialect.allow_statement_try_except)
         self.assertEquals(True, Dialect.allow_statement_raise)
         self.assertFalse(hasattr(Dialect, 'allow_statements_non_expressions'))
-    
+        self.assertEquals(False, Dialect().allow_statement_import)
+        self.assertEquals(True, Dialect().allow_statement_def)
+        self.assertEquals(True, Dialect().allow_statement_try_finally)
+        self.assertEquals(True, Dialect().allow_statement_try_except)
+        self.assertEquals(True, Dialect().allow_statement_raise)
+        self.assertFalse(hasattr(Dialect(), 'allow_statements_non_expressions'))
+
     def test_names(self):
         self.assertEquals(set(('type open eval execfile exec compile reload '
                                '__import__ globals locals delattr setattr '
                                'getattr hasattr vars raw_input input dir file '
-                               'help').split()), 
+                               'help').split()),
                           Dialect.forbidden_names_set)
-        self.assertEquals(set('__class__ __dict__ __bases__ __mro__ __module__ __file__'.split()), 
+        self.assertEquals(set('__class__ __dict__ __bases__ __mro__ __module__ __file__'.split()),
                           Dialect.forbidden_attrs_set)
         self.assertEquals(set(), Dialect.unassignable_names_set)
         self.assertEquals(set(), Dialect.unassignable_attrs_set)
-        
+
     def test_create_ast_validator(self):
-        AutoAstValidator = Dialect.ast_validator_class()
+        AutoAstValidator = Dialect().AstValidator
         # Later calls must return the same class object:
-        self.assertEquals(AutoAstValidator, Dialect.ast_validator_class())
+        self.assertEquals(AutoAstValidator, Dialect().AstValidator)
         self.assertTrue(isinstance(AutoAstValidator, type))
         self.assertTrue(issubclass(AutoAstValidator, AstValidator))
         self.assertTrue(hasattr(AutoAstValidator, 'visit_Import'))
         self.assertTrue(hasattr(AutoAstValidator, 'visit_ImportFrom'))
         self.assertTrue(hasattr(AutoAstValidator, 'visit_Exec'))
         self.assertTrue(hasattr(AutoAstValidator, 'visit_Delete'))
+        
+    def test_create_classes(self):
+        SourceTransform = Dialect().SourceTransform
+        self.assertTrue(isinstance(SourceTransform, type))
+        self.assertEquals(SourceTransform, Dialect().SourceTransform)
+        
+        SourceValicator = Dialect().SourceValidator
+        self.assertTrue(isinstance(SourceValicator, type))
+        self.assertEquals(SourceValicator, Dialect().SourceValidator)
+        
+        AstTransform = Dialect().AstTransform
+        self.assertTrue(isinstance(AstTransform, type))
+        self.assertEquals(AstTransform, Dialect().AstTransform)
+        
+        Processor = Dialect().Processor
+        self.assertTrue(isinstance(Processor, type))
+        
+    def test_dialect_name(self):
+        self.assertEquals('ltdexec.dialect.base.Dialect', Dialect.name)
 
-class EmptyCustomDialect_TestCase(unittest.TestCase):
+#==============================================================================#
+class EmptyCustomDialect_TestCase(LtdExec_TestCaseBase):
     # An empty dialect should behave just like Dialect.
-    
+
     def setUp(self):
         super(EmptyCustomDialect_TestCase, self).setUp()
         class MyDialect(Dialect):
             pass
         self.MyDialect = MyDialect
-        
+
     def test_flags(self):
         self.assertEquals(False, self.MyDialect.allow_statement_import)
         self.assertEquals(True, self.MyDialect.allow_statement_def)
@@ -51,35 +94,40 @@ class EmptyCustomDialect_TestCase(unittest.TestCase):
         self.assertEquals(True, self.MyDialect.allow_statement_try_except)
         self.assertEquals(True, self.MyDialect.allow_statement_raise)
         self.assertFalse(hasattr(self.MyDialect, 'allow_statements_non_expressions'))
-    
+
     def test_names(self):
         self.assertEquals(set(('type open eval execfile exec compile reload '
                                '__import__ globals locals delattr setattr '
                                'getattr hasattr vars raw_input input dir file '
-                               'help').split()), 
+                               'help').split()),
                           self.MyDialect.forbidden_names_set)
-        self.assertEquals(set('__class__ __dict__ __bases__ __mro__ __module__ __file__'.split()), 
+        self.assertEquals(set('__class__ __dict__ __bases__ __mro__ __module__ __file__'.split()),
                           self.MyDialect.forbidden_attrs_set)
         self.assertEquals(set(), self.MyDialect.unassignable_names_set)
         self.assertEquals(set(), self.MyDialect.unassignable_attrs_set)
         
-class CustomDialect_TestCase(unittest.TestCase):
+    def test_dialect_name(self):
+        self.assertEquals('ltdexec.tests.test_dialect.MyDialect', self.MyDialect.name)
+        
+#==============================================================================#
+class CustomDialect_TestCase(LtdExec_TestCaseBase):
     def test_parent_flag(self):
         class MyDialect(Dialect):
             allow_statements_exceptions = False
-        
+
         self.assertEquals(False, MyDialect.allow_statement_try_finally)
         self.assertEquals(False, MyDialect.allow_statement_try_except)
         self.assertEquals(False, MyDialect.allow_statement_raise)
-        
+
     def test_nested_flag_behavior(self):
+        # TODO
         # nested flags override parent flags
         pass
-        
+
     def test_non_expressions_flag(self):
         class MyDialect(Dialect):
             allow_statements_non_expressions = False
-            
+
         self.assertEquals(False, MyDialect.allow_statement_def)
         self.assertEquals(False, MyDialect.allow_statement_class)
         self.assertEquals(False, MyDialect.allow_statement_import)
@@ -105,7 +153,6 @@ class CustomDialect_TestCase(unittest.TestCase):
         self.assertEquals(False, MyDialect.allow_statement_return)
         self.assertEquals(True, MyDialect.allow_expression_yield)
         self.assertEquals(True, MyDialect.allow_expression_lambda)
-        
-        
-        
-        
+
+#==============================================================================#
+

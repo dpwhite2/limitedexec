@@ -1,7 +1,7 @@
 
 def _liststr(*args):
     return (' '.join(args)).split()
-    
+
 
 DEFAULT_FORBIDDEN_BUILTIN_FUNCTIONS = _liststr(
             '__import__ compile delattr dir eval exec execfile file getattr',
@@ -17,3 +17,6 @@ ALWAYS_FORBIDDEN_NAMES = []
 ALWAYS_FORBIDDEN_ATTRS = []
 ALWAYS_UNASSIGNABLE_NAMES = []
 ALWAYS_UNASSIGNABLE_ATTRS = []
+
+LTDEXEC_PRIVATE_PREFIX = '_LX_'
+

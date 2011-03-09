@@ -1,38 +1,55 @@
 import ast
+import __builtin__
 
+from .source import Source
+
+
+#==============================================================================#
+def compile(source, filename, dialect):
+    # TODO: if dialect is string, get dialect from registry
+    compiler = dialect.compiler_instance()
+    return compiler(source, filename)
+
+#==============================================================================#
 class BaseCompiler(object):
 
     def __init__(self, dialect):
         self.dialect = dialect
-        self.processor = dialect.Processor()
+        self.processor = dialect.Processor(dialect)
 
-    def __call__(self, source, filename):
-        assert isinstance(source, basestring)
-        code = self.do_compile(source, filename)
-        script = self.script_factory(source, code, filename)
+    def __call__(self, src, filename):
+        assert isinstance(src, basestring)
+        source = Source(src, filename)
+        try:
+            code = self.do_compile(src, filename)
+        except:
+            # TODO: reraise exception with additional info
+            raise
+        script = self.script_factory(source, code)
         return script
 
-    def compile_to_ast(self, source, filename):
-        return compile(source, filename, 'exec', flags=ast.PyCF_ONLY_AST)
+    def compile_to_ast(self, src, filename):
+        return __builtin__.compile(src, filename, 'exec', flags=ast.PyCF_ONLY_AST)
 
     def compile_to_code(self, ast_tree, filename):
-        return compile(ast_tree, filename, 'exec')
+        # TODO: if root is Module, compile using 'exec'; if root is Expression, compile using 'eval'
+        return __builtin__.compile(ast_tree, filename, 'exec')
 
-    def script_factory(self, source, code, filename):
-        # use self.dialect
-        # TODO...
-        pass
+    def script_factory(self, source, code):
+        EnvironmentFactory = self.dialect.environment_factory_class()
+        return Script(code, source, EnvironmentFactory(self.dialect))
 
 
+#==============================================================================#
 class Compiler(BaseCompiler):
 
     def __init__(self, dialect):
         super(Compiler, self).__init__(dialect)
 
-    def do_compile(self, source, filename):
+    def do_compile(self, src, filename):
         try:
-            source = self.processor.process_source(source)
-            ast_tree = self.compile_to_ast(source, filename)
+            src = self.processor.process_source(src)
+            ast_tree = self.compile_to_ast(src, filename)
 
             ast_tree = self.processor.process_ast(ast_tree)
             code = self.compile_to_code(ast_tree, filename)
@@ -43,15 +60,16 @@ class Compiler(BaseCompiler):
         return code
 
 
-class MultiCompiler(BaseCompiler):
+#==============================================================================#
+class SplitSourceCompiler(BaseCompiler):
 
     def __init__(self, dialect):
-        super(MultiCompiler, self).__init__(dialect)
+        super(SplitSourceCompiler, self).__init__(dialect)
 
-    def do_compile(self, source, filename):
+    def do_compile(self, src, filename):
         try:
-            source = processor.process_whole_source(source)
-            sources = processor.split_source(source)
+            src = processor.process_whole_source(src)
+            sources = processor.split_source(src)
 
             trees = [self.do_single_compile(src, filename) for src in sources]
 
@@ -65,9 +83,12 @@ class MultiCompiler(BaseCompiler):
 
         return code
 
-    def do_single_compile(self, source, filename):
-        source = self.processor.process_source(source)
-        tree = self.compile_to_ast(source, filename)
+    def do_single_compile(self, src, filename):
+        src = self.processor.process_source(src)
+        tree = self.compile_to_ast(src, filename)
         return self.processor.process_ast(tree)
+
+#==============================================================================#
+
 
 
