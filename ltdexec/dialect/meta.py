@@ -2,6 +2,7 @@ import sys
 
 
 from . import registry
+from .defname import deffunc
 from .. import config
 from .. import exceptions
 
@@ -20,6 +21,7 @@ class Builder(object):
         self.forbidden_attrs()
         self.unassignable_names()
         self.unassignable_attrs()
+        self.initialize_objects()
         return self.attrs
 
     def inherit_value(self, attrname, default='throw'):
@@ -135,20 +137,35 @@ class Builder(object):
                 set(self.attrs['unassignable_attrs'])
         ALWAYS_UNASSIGNABLE_ATTRS = config.names.ALWAYS_UNASSIGNABLE_ATTRS
         self.attrs['unassignable_attrs_set'].update(ALWAYS_UNASSIGNABLE_ATTRS)
+        
+    def initialize_objects(self):
+        # Add some default objects that should always be present.
+        if 'builtin_objects' not in self.attrs:
+            self.attrs['builtin_objects'] = {}
+        
 
 
 #==============================================================================#
 class DialectMeta(type):
+    """ Meta class for dialects.  This ensures that Dialects possess all the 
+        attributes the rest of the library expects.  It also registers the new 
+        dialect. 
+    """
     def __new__(mcls, clsname, bases, attrs):
         new = super(DialectMeta, mcls).__new__
         builder = Builder(clsname, bases, attrs)
         attrs = builder()
-        langd = new(mcls, clsname, bases, attrs)
+        dialect_cls = new(mcls, clsname, bases, attrs)
+        
+        dialect_cls.builtin_objects['getattr'] = deffunc(dialect_cls.getattr)
+        dialect_cls.builtin_objects['hasattr'] = deffunc(dialect_cls.hasattr)
+        dialect_cls.builtin_objects['setattr'] = deffunc(dialect_cls.setattr)
+        dialect_cls.builtin_objects['delattr'] = deffunc(dialect_cls.delattr)
 
-        registry.dialects.register(langd)
-        langd = registry.dialects[langd.name].__class__
+        registry.dialects.register(dialect_cls)
+        dialect_cls = registry.dialects[dialect_cls.name].__class__
 
-        return langd
+        return dialect_cls
 
     def __call__(cls, *args, **kwargs):
         if cls.name not in registry.dialects:

@@ -56,9 +56,9 @@ class DefaultAstValidator_TestCase(LtdExec_TestCaseBase):
 
 
 #==============================================================================#
-class ImportsDialect_TestCase(LtdExec_TestCaseBase):
+class ImportsDialectAstValidator_TestCase(LtdExec_TestCaseBase):
     def setUp(self):
-        super(ImportsDialect_TestCase, self).setUp()
+        super(ImportsDialectAstValidator_TestCase, self).setUp()
         class MyDialect(Dialect):
             allow_statement_import = True
             allow_statement_import_from = True

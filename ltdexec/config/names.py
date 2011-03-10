@@ -1,3 +1,4 @@
+import __builtin__
 
 def _liststr(*args):
     return (' '.join(args)).split()
@@ -19,3 +20,6 @@ ALWAYS_UNASSIGNABLE_NAMES = []
 ALWAYS_UNASSIGNABLE_ATTRS = []
 
 LTDEXEC_PRIVATE_PREFIX = '_LX_'
+
+BUILTIN_NAMES_SET = frozenset(x for x in __builtin__.__dict__.iterkeys())
+

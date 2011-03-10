@@ -20,14 +20,41 @@ class SourceValidator(object):
         pass
 
 #==============================================================================#
-class AstValidator(ast.NodeVisitor):
-
+class MinimalAstValidator(ast.NodeVisitor):
     def __init__(self, dialect):
-        super(AstValidator, self).__init__()
+        super(MinimalAstValidator, self).__init__()
         self.dialect = dialect
+        
+    def check_name(self, node):
+        if node.id.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
+            m = 'Names may not begin with "{0}". '
+            m += 'This is reserved for library-internal use.'
+            m = m.format(config.names.LTDEXEC_PRIVATE_PREFIX)
+            syntax_error(node, m)
+        
+    def check_attribute(self, node):
+        if node.attr.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
+            m = 'Attributes may not begin with "{0}". '
+            m += 'This is reserved for library-internal use.'
+            m = m.format(config.names.LTDEXEC_PRIVATE_PREFIX)
+            syntax_error(node, m)
+    
+    def visit_Name(self, node):
+        self.check_name(node)
+        self.generic_visit(node)
+
+    def visit_Attribute(self, node):
+        self.check_attribute(node)
+        self.generic_visit(node)
 
     def __call__(self, tree):
         self.visit(tree)
+
+#==============================================================================#
+class AstValidator(MinimalAstValidator):
+
+    def __init__(self, dialect):
+        super(AstValidator, self).__init__(dialect)
 
     def check_import_from(self, node, module, name, asname, level):
         if level > 0:
@@ -66,8 +93,9 @@ class AstValidator(ast.NodeVisitor):
         if asname and asname in self.dialect.forbidden_names_set:
             m = 'Cannot import as "{0}", it is a forbidden name.'.format(asname)
             syntax_error(node, m)
-
-    def visit_Name(self, node):
+            
+    def check_name(self, node):
+        super(AstValidator, self).check_name(node)
         ctx = node.ctx
         name = node.id
         if name in self.dialect.forbidden_names_set:
@@ -85,18 +113,12 @@ class AstValidator(ast.NodeVisitor):
                 m += 'it starts and ends with double underscores.'
                 m = m.format(name)
                 syntax_error(node, m)
-
-        if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
-            m = 'Names may not begin with "{0}". '
-            m += 'This is reserved for library-internal use.'
-            m = m.format(config.names.LTDEXEC_PRIVATE_PREFIX)
-            syntax_error(node, m)
-        self.generic_visit(node)
-
-    def visit_Attribute(self, node):
+        
+        
+    def check_attribute(self, node):
+        super(AstValidator, self).check_attribute(node)
         ctx = node.ctx
         attr = node.attr
-
         if attr in self.dialect.forbidden_attrs_set:
             m = 'Use of the attribute "{0}" is forbidden.'.format(attr)
             syntax_error(node, m, reason='forbidden_attr')
@@ -112,12 +134,19 @@ class AstValidator(ast.NodeVisitor):
                 m += 'it starts and ends with double underscores.'
                 m = m.format(attr)
                 syntax_error(node, m)
-
-        if attr.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
-            m = 'Attributes may not begin with "{0}". '
-            m += 'This is reserved for library-internal use.'
-            m = m.format(config.names.LTDEXEC_PRIVATE_PREFIX)
+                
+        if isinstance(node.value, ast.Name) and \
+           node.value.id in config.names.BUILTIN_NAMES_SET:
+            m = 'Attributes of builtins may not be accessed.'
             syntax_error(node, m)
+    
+
+    def visit_Name(self, node):
+        self.check_name(node)
+        self.generic_visit(node)
+
+    def visit_Attribute(self, node):
+        self.check_attribute(node)
         self.generic_visit(node)
 
     def visit_Import(self, node):

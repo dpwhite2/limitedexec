@@ -4,6 +4,9 @@ from . import wrapper
 
 #==============================================================================#
 class Environment(object):
+    """ A script is executed in an Environment.  This contains the globals and 
+        locals dicts that are available to the script when it begins execution. 
+    """
     def __init__(self, objects, globals, locals):
         self.key = wrapper.create_envkey()
         try:
@@ -43,6 +46,9 @@ class Environment(object):
 
 #==============================================================================#
 class EnvironmentFactory(object):
+    """ A Script contains an EnvironmentFactory, which it uses to construct the 
+        Environment each time it runs. 
+    """
     Environment = Environment
 
     def __init__(self, dialect):
@@ -50,6 +56,7 @@ class EnvironmentFactory(object):
             self.objects = dialect.objects
         except AttributeError:
             self.objects = {}
+        self.objects.update(dialect.builtins)
 
     def __call__(self, globals, locals):
         return self.Environment(self.objects, globals, locals)

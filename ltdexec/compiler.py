@@ -3,10 +3,15 @@ import __builtin__
 
 from .source import Source
 
-
 #==============================================================================#
 def compile(source, filename, dialect):
-    # TODO: if dialect is string, get dialect from registry
+    from .dialect import Dialect, dialects
+    
+    if isinstance(dialect, basestring):
+        dialect = dialects[dialect]
+    elif isinstance(dialect, type):
+        dialect = dialects[dialect.name]
+    assert isinstance(dialect, Dialect)
     compiler = dialect.compiler_instance()
     return compiler(source, filename)
 
