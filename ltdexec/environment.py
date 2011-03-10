@@ -2,6 +2,7 @@ import uuid
 import sys
 
 from . import wrapper
+from .dialect import util as dialect_util
 
 #==============================================================================#
 class Environment(object):
@@ -9,23 +10,35 @@ class Environment(object):
         locals dicts that are available to the script when it begins execution. 
     """
     def __init__(self, objects, globals, locals):
-        self.key = wrapper.create_envkey()
+        assert isinstance(objects, dict)
+        assert isinstance(globals, dict)
+        assert isinstance(locals, dict)
+        
         self.metadata = {}
+        self.key = wrapper.create_envkey()
+        _globals = {}
         try:
-            _globals = {}
             for name, objdef in objects.iteritems():
                 _globals[name] = objdef.construct()
                 self.metadata[name] = {
+                    'id': id(_globals[name]),
                     'method_on_close': objdef.method_on_close,
                     }
-            _globals.update(globals)
-
-            self.globals = _globals
-            self.locals = locals
-            self.modules = {}
         except:
+            exc = sys.exc_info()
+            for name, obj in _globals.iteritems():
+                try:
+                    self._close_object(name, obj)
+                except:
+                    pass
             wrapper.pop_envkey(self.key)
-            raise
+            raise exc[0], exc[1], exc[2]
+             
+        _globals.update(globals)
+
+        self.globals = _globals
+        self.locals = locals
+        self.modules = {}
         # TODO: put custom import function into globals
         
     def _close_object(self, name, obj):
@@ -34,8 +47,9 @@ class Environment(object):
         except AttributeError:
             pass
         finally:
-            if name in self.metadata:
+            if name in self.metadata and self.metadata[name]['id']==id(obj):
                 getattr(obj, self.metadata[name]['method_on_close'], lambda: None)()
+                self.metadata.pop(name)  # pop the metadata so we don't close the same object twice
 
     def close(self):
         """ Called when a script has completed execution.  Any cleanup required 
@@ -43,12 +57,18 @@ class Environment(object):
         """
         key = self.key
         exc = None
-        for name, obj in self.globals:
+        for name, obj in self.globals.iteritems():
             try:
                 self._close_object(name, obj)
             except:
-                excinfo = sys.exc_info()
-        if excinfo:
+                exc = sys.exc_info()
+        for name, obj in self.locals.iteritems():
+            try:
+                self._close_object(name, obj)
+            except:
+                exc = sys.exc_info()
+        wrapper.pop_envkey(key)
+        if exc:
             raise exc[0], exc[1], exc[2]
 
 
@@ -70,14 +90,17 @@ class EnvironmentFactory(object):
     Environment = Environment
 
     def __init__(self, dialect):
+        dialect = dialect_util.get_dialect_object(dialect)
         try:
             self.objects = dialect.objects
         except AttributeError:
             self.objects = {}
-        self.objects.update(dialect.builtins)
+        self.objects.update(dialect.builtin_objects)
 
-    def __call__(self, globals, locals):
+    def __call__(self, globals=None, locals=None):
         """ Create an Environment object. """
+        globals = globals or {}
+        locals = locals or {}
         return self.Environment(self.objects, globals, locals)
 
 

@@ -5,13 +5,8 @@ from .source import Source
 
 #==============================================================================#
 def compile(source, filename, dialect):
-    from .dialect import Dialect, dialects
-    
-    if isinstance(dialect, basestring):
-        dialect = dialects[dialect]
-    elif isinstance(dialect, type):
-        dialect = dialects[dialect.name]
-    assert isinstance(dialect, Dialect)
+    from .dialect import util as dialect_util
+    dialect = dialect_util.get_dialect_object(dialect)
     compiler = dialect.compiler_instance()
     return compiler(source, filename)
 
@@ -54,15 +49,11 @@ class Compiler(BaseCompiler):
         super(Compiler, self).__init__(dialect)
 
     def do_compile(self, src, filename):
-        try:
-            src = self.processor.process_source(src)
-            ast_tree = self.compile_to_ast(src, filename)
+        src = self.processor.process_source(src)
+        ast_tree = self.compile_to_ast(src, filename)
 
-            ast_tree = self.processor.process_ast(ast_tree)
-            code = self.compile_to_code(ast_tree, filename)
-        except:
-            # TODO: reraise exception with additional info
-            raise
+        ast_tree = self.processor.process_ast(ast_tree)
+        code = self.compile_to_code(ast_tree, filename)
 
         return code
 
@@ -74,19 +65,15 @@ class SplitSourceCompiler(BaseCompiler):
         super(SplitSourceCompiler, self).__init__(dialect)
 
     def do_compile(self, src, filename):
-        try:
-            src = processor.process_whole_source(src)
-            sources = processor.split_source(src)
+        src = processor.process_whole_source(src)
+        sources = processor.split_source(src)
 
-            trees = [self.do_single_compile(src, filename) for src in sources]
+        trees = [self.do_single_compile(src, filename) for src in sources]
 
-            ast_tree = self.processor.merge_asts(trees)
-            ast_tree = self.processor.process_merged_ast(ast_tree)
+        ast_tree = self.processor.merge_asts(trees)
+        ast_tree = self.processor.process_merged_ast(ast_tree)
 
-            code = self.compile_to_code(ast_tree, filename)
-        except:
-            # TODO: reraise exception with additional info
-            raise
+        code = self.compile_to_code(ast_tree, filename)
 
         return code
 

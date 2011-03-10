@@ -1,2 +1,3 @@
-from .processor import Processor
+from . import processor, transform, validator
 
+Processor = processor.Processor

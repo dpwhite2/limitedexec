@@ -101,6 +101,200 @@ class ImportsDialectAstValidator_TestCase(LtdExec_TestCaseBase):
         tree = ast.parse("from package import name")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
+        
+    def test_forbidden_name_import(self):
+        tree = ast.parse("import type")
+        with self.assertRaises(exceptions.SyntaxError) as cm:
+            self.validator(tree)
+        self.assertEquals(1, cm.exception.lineno)
+        self.assertEquals(0, cm.exception.offset)
+        self.assertEquals('import_forbidden_name', cm.exception.reason)
+        
+        tree = ast.parse("from module import type")
+        with self.assertRaises(exceptions.SyntaxError) as cm:
+            self.validator(tree)
+        self.assertEquals(1, cm.exception.lineno)
+        self.assertEquals(0, cm.exception.offset)
+        self.assertEquals('import_forbidden_name', cm.exception.reason)
+        
+        tree = ast.parse("from module import abc as type")
+        with self.assertRaises(exceptions.SyntaxError) as cm:
+            self.validator(tree)
+        self.assertEquals(1, cm.exception.lineno)
+        self.assertEquals(0, cm.exception.offset)
+        self.assertEquals('import_forbidden_name', cm.exception.reason)
+        
+    def test_relative_import(self):
+        tree = ast.parse("from . import name")
+        with self.assertRaises(exceptions.SyntaxError) as cm:
+            self.validator(tree)
+        self.assertEquals(1, cm.exception.lineno)
+        self.assertEquals(0, cm.exception.offset)
+        self.assertEquals('relative_import', cm.exception.reason)
+        
+        tree = ast.parse("from .package import name")
+        with self.assertRaises(exceptions.SyntaxError) as cm:
+            self.validator(tree)
+        self.assertEquals(1, cm.exception.lineno)
+        self.assertEquals(0, cm.exception.offset)
+        self.assertEquals('relative_import', cm.exception.reason)
+        
+        tree = ast.parse("from .. import name")
+        with self.assertRaises(exceptions.SyntaxError) as cm:
+            self.validator(tree)
+        self.assertEquals(1, cm.exception.lineno)
+        self.assertEquals(0, cm.exception.offset)
+        self.assertEquals('relative_import', cm.exception.reason)
+        
+
+#==============================================================================#
+class ImportsDialectAstValidator2_TestCase(LtdExec_TestCaseBase):
+    def setUp(self):
+        super(ImportsDialectAstValidator2_TestCase, self).setUp()
+        class MyDialect(Dialect):
+            allow_statements_imports = True
+            allowed_imports = {
+                'math': set(),
+                }
+
+        self.MyDialect = MyDialect()
+        self.AstValidator = MyDialect().AstValidator
+        self.validator = self.AstValidator(MyDialect)
+
+    def test_basic(self):
+        self.assertEqual(True, self.MyDialect.allow_statement_import)
+        self.assertEqual(True, self.MyDialect.allow_statement_import_from)
+
+    def test_empty(self):
+        tree = ast.parse("")
+        self.validator(tree)
+        self.assertTrue('Good.  No exception was thrown.')
+
+    def test_import_allowed(self):
+        tree = ast.parse("import math")
+        self.validator(tree)
+        self.assertTrue('Good.  No exception was thrown.')
+
+        tree = ast.parse("from math import sin")
+        self.validator(tree)
+        self.assertTrue('Good.  No exception was thrown.')
+        
+    def test_import_not_allowed(self):
+        tree = ast.parse("import sys")
+        with self.assertRaises(exceptions.SyntaxError) as cm:
+            self.validator(tree)
+        self.assertEquals(1, cm.exception.lineno)
+        self.assertEquals(0, cm.exception.offset)
+        self.assertEquals('not_in_allowed_imports', cm.exception.reason)
+        
+        tree = ast.parse("from sys import names")
+        with self.assertRaises(exceptions.SyntaxError) as cm:
+            self.validator(tree)
+        self.assertEquals(1, cm.exception.lineno)
+        self.assertEquals(0, cm.exception.offset)
+        self.assertEquals('not_in_allowed_imports', cm.exception.reason)
+
+#==============================================================================#
+class ImportsDialectAstValidator3_TestCase(LtdExec_TestCaseBase):
+    def setUp(self):
+        super(ImportsDialectAstValidator3_TestCase, self).setUp()
+        class MyDialect(Dialect):
+            allow_statements_imports = True
+            forbidden_imports = set(('sys',))
+
+        self.MyDialect = MyDialect()
+        self.AstValidator = MyDialect().AstValidator
+        self.validator = self.AstValidator(MyDialect)
+
+    def test_basic(self):
+        self.assertEqual(True, self.MyDialect.allow_statement_import)
+        self.assertEqual(True, self.MyDialect.allow_statement_import_from)
+
+    def test_empty(self):
+        tree = ast.parse("")
+        self.validator(tree)
+        self.assertTrue('Good.  No exception was thrown.')
+
+    def test_import_not_forbidden(self):
+        tree = ast.parse("import math")
+        self.validator(tree)
+        self.assertTrue('Good.  No exception was thrown.')
+
+        tree = ast.parse("from math import cos")
+        self.validator(tree)
+        self.assertTrue('Good.  No exception was thrown.')
+        
+    def test_import_forbidden(self):
+        tree = ast.parse("import sys")
+        with self.assertRaises(exceptions.SyntaxError) as cm:
+            self.validator(tree)
+        self.assertEquals(1, cm.exception.lineno)
+        self.assertEquals(0, cm.exception.offset)
+        self.assertEquals('forbidden_import', cm.exception.reason)
+        
+        tree = ast.parse("from sys import names")
+        with self.assertRaises(exceptions.SyntaxError) as cm:
+            self.validator(tree)
+        self.assertEquals(1, cm.exception.lineno)
+        self.assertEquals(0, cm.exception.offset)
+        self.assertEquals('forbidden_import', cm.exception.reason)
+        
+
+#==============================================================================#
+class ImportsDialectAstValidator4_TestCase(LtdExec_TestCaseBase):
+    def setUp(self):
+        super(ImportsDialectAstValidator4_TestCase, self).setUp()
+        class MyDialect(Dialect):
+            allow_statements_imports = True
+            allowed_imports = {
+                'sys': set(('exc_info','version_info',)),
+                'math': None,
+                }
+
+        self.MyDialect = MyDialect()
+        self.AstValidator = MyDialect().AstValidator
+        self.validator = self.AstValidator(MyDialect)
+
+    def test_basic(self):
+        self.assertEqual(True, self.MyDialect.allow_statement_import)
+        self.assertEqual(True, self.MyDialect.allow_statement_import_from)
+
+    def test_empty(self):
+        tree = ast.parse("")
+        self.validator(tree)
+        self.assertTrue('Good.  No exception was thrown.')
+
+    def test_import_allowed(self):
+        tree = ast.parse("import math")
+        self.validator(tree)
+        self.assertTrue('Good.  No exception was thrown.')
+        
+        tree = ast.parse("import sys")
+        self.validator(tree)
+        self.assertTrue('Good.  No exception was thrown.')
+        
+        tree = ast.parse("from sys import exc_info")
+        self.validator(tree)
+        self.assertTrue('Good.  No exception was thrown.')
+
+        tree = ast.parse("from sys import exc_info, version_info")
+        self.validator(tree)
+        self.assertTrue('Good.  No exception was thrown.')
+        
+    def test_import_not_allowed(self):
+        tree = ast.parse("from sys import path")
+        with self.assertRaises(exceptions.SyntaxError) as cm:
+            self.validator(tree)
+        self.assertEquals(1, cm.exception.lineno)
+        self.assertEquals(0, cm.exception.offset)
+        self.assertEquals('not_in_allowed_imports_froms', cm.exception.reason)
+        
+        tree = ast.parse("from sys import exc_info, exit")
+        with self.assertRaises(exceptions.SyntaxError) as cm:
+            self.validator(tree)
+        self.assertEquals(1, cm.exception.lineno)
+        self.assertEquals(0, cm.exception.offset)
+        self.assertEquals('not_in_allowed_imports_froms', cm.exception.reason)
 
 #==============================================================================#
 class NoDoubleUnderscoreNames_AstValidator_TestCase(LtdExec_TestCaseBase):

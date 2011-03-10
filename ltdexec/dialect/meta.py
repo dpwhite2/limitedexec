@@ -2,9 +2,7 @@ import sys
 
 
 from . import registry
-from .defname import deffunc
-from .. import config
-from .. import exceptions
+from .. import config, exceptions
 
 #==============================================================================#
 class Builder(object):
@@ -152,6 +150,8 @@ class DialectMeta(type):
         dialect. 
     """
     def __new__(mcls, clsname, bases, attrs):
+        from .defobjects import deffunc
+        
         new = super(DialectMeta, mcls).__new__
         attrs['_locked'] = False
         builder = Builder(clsname, bases, attrs)
@@ -164,23 +164,29 @@ class DialectMeta(type):
         dialect_cls.builtin_objects['delattr'] = deffunc(dialect_cls.delattr)
 
         registry.dialects.register(dialect_cls)
-        dialect_cls = registry.dialects[dialect_cls.name].__class__
+        dialect_cls = registry.dialects.get_class(dialect_cls.name)
 
         dialect_cls._locked = True
         return dialect_cls
 
     def __call__(cls, *args, **kwargs):
-        if cls.name not in registry.dialects:
-            inst = super(DialectMeta, cls).__call__(*args, **kwargs)
-            inst._locked_inst = True
-            return inst
-        else:
-            return registry.dialects[cls.name]
+        # Constructing an instance of the class always returns the same 
+        # instance.  It is the registry's job to maintain the single instance.  
+        # The registry will call _construct() when it constructs the instance.
+        return registry.dialects[cls.name]
             
     def __setattr__(cls, name, value):
         if cls._locked:
             raise RuntimeError('A Dialect is immutable.  It cannot be modified once created.')
         else:
             super(DialectMeta, cls).__setattr__(name, value)
+            
+    def _construct(cls, *args, **kwargs):
+        # Construct an instance of the class.  This is separated from 
+        # __call__() on purpose.  It is called from the registry when an 
+        # instance needs to be created.
+        inst = super(DialectMeta, cls).__call__(*args, **kwargs)
+        inst._locked_inst = True
+        return inst
 
 #==============================================================================#

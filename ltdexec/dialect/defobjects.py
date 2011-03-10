@@ -1,3 +1,4 @@
+from functools import wraps
 
 #==============================================================================#
 # The following are used when defining what objects appear in a Dialect's 
@@ -8,7 +9,7 @@ class defname(object):
         self.callable = callable
         self.args = args or []
         self.kwargs = kwargs or {}
-        self.method_on_close = method_on_close
+        self.method_on_close = method_on_close or ''
         
     def construct(self):
         return self.callable(*self.args, **self.kwargs)

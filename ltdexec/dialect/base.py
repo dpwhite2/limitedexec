@@ -1,11 +1,7 @@
 import __builtin__
 
-from .meta import DialectMeta
-from . import registry
-from ..config.flags import leafflag_traits
-
-from ..processor import validator, transform, processor
-from .. import compiler, environment
+from . import registry, meta
+from .. import config
 
 
 
@@ -25,7 +21,7 @@ class _DialectBase(object):
             return super(_DialectBase, self).__setattr__(name, val)
 
 # Set flag defaults in _DialectBase.
-for traits in leafflag_traits.itervalues():
+for traits in config.flags.leafflag_traits.itervalues():
     setattr(_DialectBase, traits.name, traits.default)
 
 
@@ -50,7 +46,7 @@ class Dialect(_DialectBase):
         
         ..
     """
-    __metaclass__ = DialectMeta
+    __metaclass__ = meta.DialectMeta
     
     #: The :class:`~ltdexec.processor.processor.Processor` to use.  If not set, 
     #: a default is chosen.
@@ -81,8 +77,9 @@ class Dialect(_DialectBase):
     Compiler = None
 
     def __init__(self):
-        ##print 'creating Dialect.'
-        ##assert hasattr(self, '_locked_inst') == False
+        from ..processor import validator, transform, processor
+        from .. import compiler, environment
+        
         self._locked_inst = False
         self.Processor = self.Processor or processor.Processor
         self.SourceValidator = self.SourceValidator or validator.SourceValidator
@@ -108,7 +105,7 @@ class Dialect(_DialectBase):
             scripts.  This version checks that the given attribute is 
             permissible. 
         """
-        if name.startswith(LTDEXEC_PRIVATE_PREFIX):
+        if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             raise RuntimeError('TODO')
         elif name in cls.forbidden_attrs_set:
             raise RuntimeError('TODO')
@@ -120,7 +117,7 @@ class Dialect(_DialectBase):
             scripts.  This version checks that the given attribute is 
             permissible. 
         """
-        if name.startswith(LTDEXEC_PRIVATE_PREFIX):
+        if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             raise RuntimeError('TODO')
         elif name in cls.forbidden_attrs_set:
             raise RuntimeError('TODO')
@@ -132,7 +129,7 @@ class Dialect(_DialectBase):
             scripts.  This version checks that the given attribute is 
             permissible. 
         """
-        if name.startswith(LTDEXEC_PRIVATE_PREFIX):
+        if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             raise RuntimeError('TODO')
         elif name in cls.forbidden_attrs_set:
             raise RuntimeError('TODO')
@@ -146,7 +143,7 @@ class Dialect(_DialectBase):
             scripts.  This version checks that the given attribute is 
             permissible. 
         """
-        if name.startswith(LTDEXEC_PRIVATE_PREFIX):
+        if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             raise RuntimeError('TODO')
         elif name in cls.forbidden_attrs_set:
             raise RuntimeError('TODO')

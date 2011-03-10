@@ -101,41 +101,44 @@ class AstValidator(MinimalAstValidator):
 
     def check_import_from(self, node, module, name, asname, level):
         if level > 0:
-            syntax_error(node, 'Relative imports are not permitted.')
+            syntax_error(node, 'Relative imports are not permitted.', 
+                         reason='relative_import')
 
         if self.dialect.allowed_imports:
             if module not in self.dialect.allowed_imports:
                 m = 'Cannot import "{0}", it is not among the allowed imports.'
                 m = m.format(module)
-                syntax_error(node, m)
+                syntax_error(node, m, reason='not_in_allowed_imports')
             allowed_froms = self.dialect.allowed_imports[module]
             if allowed_froms and (name not in allowed_froms):
                 m = 'Importing "{0}" from "{1}" is not permitted.'
                 m = m.format(name, module)
-                syntax_error(node, m)
+                syntax_error(node, m, reason='not_in_allowed_imports_froms')
 
         elif module in self.dialect.forbidden_imports:
             m = 'Importing of "{0}" is not permitted.'.format(module)
-            syntax_error(node, m)
+            syntax_error(node, m, reason='forbidden_import')
 
-        if asname and asname in self.dialect.forbidden_names_set:
+        if ((name in self.dialect.forbidden_names_set) or
+           (asname and asname in self.dialect.forbidden_names_set)):
             m = 'Cannot import as "{0}", it is a forbidden name.'.format(asname)
-            syntax_error(node, m)
+            syntax_error(node, m, reason='import_forbidden_name')
 
     def check_import(self, node, name, asname):
         if self.dialect.allowed_imports:
             if name not in self.dialect.allowed_imports:
                 m = 'Cannot import "{0}", it is not among the allowed imports.'
-                m = m.format(module)
-                syntax_error(node, m)
+                m = m.format(name)
+                syntax_error(node, m, reason='not_in_allowed_imports')
 
         elif name in self.dialect.forbidden_imports:
-            m = 'Importing of "{0}" is not permitted.'.format(module)
-            syntax_error(node, m)
+            m = 'Importing of "{0}" is not permitted.'.format(name)
+            syntax_error(node, m, reason='forbidden_import')
 
-        if asname and asname in self.dialect.forbidden_names_set:
+        if ((name in self.dialect.forbidden_names_set) or
+           (asname and asname in self.dialect.forbidden_names_set)):
             m = 'Cannot import as "{0}", it is a forbidden name.'.format(asname)
-            syntax_error(node, m)
+            syntax_error(node, m, reason='import_forbidden_name')
             
     def check_name(self, node):
         super(AstValidator, self).check_name(node)
