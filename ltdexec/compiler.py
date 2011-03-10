@@ -27,15 +27,24 @@ class BaseCompiler(object):
             raise
         script = self.script_factory(source, code)
         return script
+        
+    def do_compile(self, src, filename):
+        raise NotImplementedError()
 
-    def compile_to_ast(self, src, filename):
-        return __builtin__.compile(src, filename, 'exec', 
+    def compile_to_ast(self, src, filename, mode='exec'):
+        return __builtin__.compile(src, filename, mode, 
                                    flags=ast.PyCF_ONLY_AST)
 
     def compile_to_code(self, ast_tree, filename):
         # TODO: if root is Module, compile using 'exec'; 
         #       if root is Expression, compile using 'eval'
-        return __builtin__.compile(ast_tree, filename, 'exec')
+        if isinstance(ast_tree, ast.Module):
+            mode = 'exec'
+        elif isinstance(ast_tree, ast.Expression):
+            mode = 'eval'
+        else:
+            raise RuntimeError('TODO')
+        return __builtin__.compile(ast_tree, filename, mode)
 
     def script_factory(self, source, code):
         EnvironmentFactory = self.dialect.environment_factory_class()

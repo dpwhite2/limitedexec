@@ -11,7 +11,7 @@ class _DialectBase(object):
         and attributes. 
     """
     allowed_imports = {}
-    forbidden_imports = {}
+    forbidden_imports = []
     objects = {}
         
     def __setattr__(self, name, val):

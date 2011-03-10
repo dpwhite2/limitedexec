@@ -1,4 +1,5 @@
 import sys
+import collections
 
 
 from . import registry
@@ -13,6 +14,7 @@ class Builder(object):
 
     def __call__(self):
         """ Populate a class attributes dict with attributes. """
+        self.check_attrs()
         self.set_defaults()
         self.process_flags()
         self.forbidden_names()
@@ -22,6 +24,7 @@ class Builder(object):
         self.initialize_objects()
         return self.attrs
 
+    #--------------------------------------------------------------------------#
     def inherit_value(self, attrname, default='throw'):
         """ Look in base classes for the given attribute.  If it is found, that
             value is returned.  If not, the default is returned.  If default is
@@ -72,7 +75,22 @@ class Builder(object):
             if parentname in self.attrs:
                 self.attrs[traits.name] = self.attrs[parentname]
                 return
-
+    
+    #--------------------------------------------------------------------------#
+    def check_attrs(self):
+        """ Check that attributes meet preconditions. """
+        # TODO: raise a specific exception; don't just assert
+        if 'name' in self.attrs:
+            assert isinstance(self.attrs['name'], basestring)
+        if 'allowed_imports' in self.attrs:
+            assert isinstance(self.attrs['allowed_imports'], dict)
+        if 'objects' in self.attrs:
+            assert isinstance(self.attrs['objects'], dict)
+        assert 'forbidden_names_set' not in self.attrs
+        assert 'forbidden_attrs_set' not in self.attrs
+        assert 'unassignable_names_set' not in self.attrs
+        assert 'unassignable_attrs_set' not in self.attrs
+    
     def set_defaults(self):
         """ Set class default values if they are not defined. """
         if not self.attrs.get("name"):
