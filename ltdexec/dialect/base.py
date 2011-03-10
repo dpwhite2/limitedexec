@@ -3,6 +3,7 @@ import __builtin__
 from .meta import DialectMeta
 from . import registry
 from ..config.flags import leafflag_traits
+
 from ..processor import validator, transform, processor
 from .. import compiler, environment
 
@@ -16,6 +17,12 @@ class _DialectBase(object):
     allowed_imports = {}
     forbidden_imports = {}
     objects = {}
+        
+    def __setattr__(self, name, val):
+        if getattr(self, '_locked_inst', False):
+            raise RuntimeError('A Dialect class instance is immutable.  It cannot be modified once constructed.')
+        else:
+            return super(_DialectBase, self).__setattr__(name, val)
 
 # Set flag defaults in _DialectBase.
 for traits in leafflag_traits.itervalues():
@@ -40,19 +47,43 @@ class Dialect(_DialectBase):
         immutable, it allows them to be singletons without incurring the 
         downsides singletons otherwise may have.  In fact, calling the class 
         (e.g. ``x = Dialect()``) will *always* return the same instance object.
+        
+        ..
     """
     __metaclass__ = DialectMeta
-
+    
+    #: The :class:`~ltdexec.processor.processor.Processor` to use.  If not set, 
+    #: a default is chosen.
     Processor = None
+    
+    #: The :class:`~ltdexec.processor.validator.SourceValidator` to use.  If 
+    #: not set, a default is chosen.
     SourceValidator = None
+    
+    #: The :class:`~ltdexec.processor.transform.SourceTransform` to use.  If 
+    #: not set, a default is chosen.
     SourceTransform = None
+    
+    #: The :class:`~ltdexec.processor.validator.AstValidator` to use.  If not 
+    #: set, a default is chosen.
     AstValidator = None
+    
+    #: The :class:`~ltdexec.processor.transform.AstTransform` to use.  If not 
+    #: set, a default is chosen.
     AstTransform = None
+    
+    #: The :class:`~ltdexec.environment.EnvironmentFactory` to use.  If not 
+    #: set, a default is chosen.
     EnvironmentFactory = None
+    
+    #: The :class:`~ltdexec.compiler.Compiler` to use.  If not set, a default 
+    #: is chosen.
     Compiler = None
 
     def __init__(self):
         ##print 'creating Dialect.'
+        ##assert hasattr(self, '_locked_inst') == False
+        self._locked_inst = False
         self.Processor = self.Processor or processor.Processor
         self.SourceValidator = self.SourceValidator or validator.SourceValidator
         self.SourceTransform = self.SourceTransform or transform.SourceTransform
@@ -65,12 +96,18 @@ class Dialect(_DialectBase):
 
     @classmethod
     def compile(cls, src, filename):
+        """ Compile the given source text using the Dialect's compiler 
+            class. """
         dialect = registry.dialects[cls.name]
         return dialect.compiler(src, filename)
     
     
     @classmethod
     def getattr(cls, obj, name, *args):
+        """ Overrides the builtin `getattr` function within LimitedExec 
+            scripts.  This version checks that the given attribute is 
+            permissible. 
+        """
         if name.startswith(LTDEXEC_PRIVATE_PREFIX):
             raise RuntimeError('TODO')
         elif name in cls.forbidden_attrs_set:
@@ -79,6 +116,10 @@ class Dialect(_DialectBase):
         
     @classmethod
     def hasattr(cls, obj, name):
+        """ Overrides the builtin `hasattr` function within LimitedExec 
+            scripts.  This version checks that the given attribute is 
+            permissible. 
+        """
         if name.startswith(LTDEXEC_PRIVATE_PREFIX):
             raise RuntimeError('TODO')
         elif name in cls.forbidden_attrs_set:
@@ -87,6 +128,10 @@ class Dialect(_DialectBase):
         
     @classmethod
     def setattr(cls, obj, name, val):
+        """ Overrides the builtin `setattr` function within LimitedExec 
+            scripts.  This version checks that the given attribute is 
+            permissible. 
+        """
         if name.startswith(LTDEXEC_PRIVATE_PREFIX):
             raise RuntimeError('TODO')
         elif name in cls.forbidden_attrs_set:
@@ -97,6 +142,10 @@ class Dialect(_DialectBase):
         
     @classmethod
     def delattr(cls, obj, name):
+        """ Overrides the builtin `delattr` function within LimitedExec 
+            scripts.  This version checks that the given attribute is 
+            permissible. 
+        """
         if name.startswith(LTDEXEC_PRIVATE_PREFIX):
             raise RuntimeError('TODO')
         elif name in cls.forbidden_attrs_set:

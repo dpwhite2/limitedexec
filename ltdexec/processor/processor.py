@@ -1,5 +1,16 @@
+"""
+ltdexec.processor.processor
+===========================
 
+Processors that handle a script before it is compiled.
+
+"""
 class Processor(object):
+    """ Perform modifications and checks of a script before it is compiled. 
+    
+        A Processor has the opportunity to modify and validate the raw source 
+        code and the compiled abstract syntax tree. 
+    """
     def __init__(self, dialect):
         self.dialect = dialect
         self.SourceValidator = dialect.SourceValidator

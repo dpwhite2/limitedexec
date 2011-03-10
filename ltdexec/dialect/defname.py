@@ -4,10 +4,11 @@
 # namespace.
 
 class defname(object):
-    def __init__(self, callable, args=None, kwargs=None):
+    def __init__(self, callable, args=None, kwargs=None, method_on_close=None):
         self.callable = callable
         self.args = args or []
         self.kwargs = kwargs or {}
+        self.method_on_close = method_on_close
         
     def construct(self):
         return self.callable(*self.args, **self.kwargs)

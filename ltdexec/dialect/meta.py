@@ -153,6 +153,7 @@ class DialectMeta(type):
     """
     def __new__(mcls, clsname, bases, attrs):
         new = super(DialectMeta, mcls).__new__
+        attrs['_locked'] = False
         builder = Builder(clsname, bases, attrs)
         attrs = builder()
         dialect_cls = new(mcls, clsname, bases, attrs)
@@ -165,12 +166,21 @@ class DialectMeta(type):
         registry.dialects.register(dialect_cls)
         dialect_cls = registry.dialects[dialect_cls.name].__class__
 
+        dialect_cls._locked = True
         return dialect_cls
 
     def __call__(cls, *args, **kwargs):
         if cls.name not in registry.dialects:
-            return super(DialectMeta, cls).__call__(*args, **kwargs)
+            inst = super(DialectMeta, cls).__call__(*args, **kwargs)
+            inst._locked_inst = True
+            return inst
         else:
             return registry.dialects[cls.name]
+            
+    def __setattr__(cls, name, value):
+        if cls._locked:
+            raise RuntimeError('A Dialect is immutable.  It cannot be modified once created.')
+        else:
+            super(DialectMeta, cls).__setattr__(name, value)
 
 #==============================================================================#

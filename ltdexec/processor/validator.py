@@ -1,3 +1,13 @@
+"""
+ltdexec.processor.validator
+===========================
+
+Validator classes verify that the raw source code or abstract syntax tree is 
+permissible before it is finally compiled to Python byte code.  They signal 
+errors through exceptions, which may be used to provide an error message.
+
+"""
+
 import ast
 import re
 
@@ -14,30 +24,53 @@ def syntax_error(node, msg, reason=None):
 
 #==============================================================================#
 class SourceValidator(object):
+    """ A SourceValidator verifies the correctness of raw source code. """
     def __init__(self, dialect):
         self.dialect = dialect
+        
     def __call__(self, source):
+        """ Perform the validation. 
+        
+            This default implementation does nothing; it simply returns the 
+            source unchanged.
+        """
         pass
 
 #==============================================================================#
 class MinimalAstValidator(ast.NodeVisitor):
+    """ The MinimalSourceValidator must be the base class of all abstract 
+        syntax tree validators. It verifies the few rules that all LimitedExec 
+        scripts must follow. 
+    """
     def __init__(self, dialect):
         super(MinimalAstValidator, self).__init__()
         self.dialect = dialect
         
     def check_name(self, node):
+        """ Verifies that a name node does not use a name reserved for use by 
+            LimitedExec.  Such names begin with ``_LX_``.
+            
+            All abstract syntax tree validators **must** call this method, 
+            directly or indirectly.
+        """
         if node.id.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             m = 'Names may not begin with "{0}". '
             m += 'This is reserved for library-internal use.'
             m = m.format(config.names.LTDEXEC_PRIVATE_PREFIX)
-            syntax_error(node, m)
+            syntax_error(node, m, reason='private_prefix_name')
         
     def check_attribute(self, node):
+        """ Verifies that a name node does not use a name reserved for use by 
+            LimitedExec.  Such names begin with ``_LX_``. 
+            
+            All abstract syntax tree validators **must** call this method, 
+            directly or indirectly.
+        """
         if node.attr.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             m = 'Attributes may not begin with "{0}". '
             m += 'This is reserved for library-internal use.'
             m = m.format(config.names.LTDEXEC_PRIVATE_PREFIX)
-            syntax_error(node, m)
+            syntax_error(node, m, reason='private_prefix_attr')
     
     def visit_Name(self, node):
         self.check_name(node)
@@ -48,10 +81,20 @@ class MinimalAstValidator(ast.NodeVisitor):
         self.generic_visit(node)
 
     def __call__(self, tree):
+        """ Perform the validation. """
         self.visit(tree)
 
 #==============================================================================#
 class AstValidator(MinimalAstValidator):
+    """ Base class of the default abstract syntax tree validator class created 
+        by a Dialect. 
+        
+        This class checks that imports, if permitted, only import modules in 
+        the Dialect's approved list.  It also checks that the names and 
+        attributes used are permitted.  It also makes sure that names and 
+        attributes that are the target of an assignment operation are allowed 
+        to be the result of such an operation.
+    """
 
     def __init__(self, dialect):
         super(AstValidator, self).__init__(dialect)
@@ -112,7 +155,7 @@ class AstValidator(MinimalAstValidator):
                 m = 'Use of the name "{0}" is forbidden--'
                 m += 'it starts and ends with double underscores.'
                 m = m.format(name)
-                syntax_error(node, m)
+                syntax_error(node, m, reason='double_underscore_name')
         
         
     def check_attribute(self, node):
@@ -133,7 +176,7 @@ class AstValidator(MinimalAstValidator):
                 m = 'Use of the attribute "{0}" is forbidden--'
                 m += 'it starts and ends with double underscores.'
                 m = m.format(attr)
-                syntax_error(node, m)
+                syntax_error(node, m, reason='double_underscore_attr')
                 
         if isinstance(node.value, ast.Name) and \
            node.value.id in config.names.BUILTIN_NAMES_SET:
@@ -171,6 +214,12 @@ def make_forbidden_visitor(name, description):
     return func
 
 def create_ast_validator_class(dialect):
+    """ Create an abstract syntax tree validator class using the given 
+        dialect.  
+        
+        By default, a Dialect uses this function to create an ast validator.  
+        The validator produced will have AstValdiator as a base class.
+    """
     attrs = {}
     for flag, flagtraits in config.flags.node_leafflag_traits.iteritems():
         if getattr(dialect, flag) == False:

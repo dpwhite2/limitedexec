@@ -158,7 +158,7 @@ T = ModuleTraits
 module_leafflag_traits = [
     T('allow_module_os', False, 'os'),
     T('allow_module_sys', False, 'sys'),
-    T('allow_module_builtin', False, 'builtin'),
+    T('allow_module_builtin', False, '__builtin__'),
 ]
 module_leafflag_traits = dict((t.name, t) for t in module_leafflag_traits)
 

@@ -1,4 +1,11 @@
+"""
+ltdexec.processor.transform
+===========================
 
+Transform classes modify the raw source code or the abstract syntax tree before 
+it has been compiled.
+
+"""
 
 class TransformBase(object):
     def __init__(self, dialect):

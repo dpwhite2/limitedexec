@@ -13,12 +13,14 @@ class Result(object):
 
 #==============================================================================#
 class Script(object):
-    def __init__(self, code, source, envrionment_factory):
+    def __init__(self, code, source, dialect):
         assert isinstance(source, Source)
+        self.python_version = sys.version_info
         self.code = code
         self.source = source
-        self.env_factory = envrionment_factory
-        self.python_version = sys.version_info
+        self.dialect = dialect
+        EnvironmentFactory = self.dialect.environment_factory_class()
+        self.env_factory = EnvironmentFactory(self.dialect)
 
     def run(self, globals=None, locals=None):
         globals = globals or {}
