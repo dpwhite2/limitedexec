@@ -14,6 +14,7 @@ manipulation and checking, compilation to Python byte code, and the execution
 of that byte code.  It is designed to be flexible and highly customizable.
 
 .. contents::
+   :local:
 
 Installation
 ############
