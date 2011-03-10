@@ -75,7 +75,7 @@ class Builder(object):
             if parentname in self.attrs:
                 self.attrs[traits.name] = self.attrs[parentname]
                 return
-    
+
     #--------------------------------------------------------------------------#
     def check_attrs(self):
         """ Check that attributes meet preconditions. """
@@ -90,12 +90,12 @@ class Builder(object):
         assert 'forbidden_attrs_set' not in self.attrs
         assert 'unassignable_names_set' not in self.attrs
         assert 'unassignable_attrs_set' not in self.attrs
-    
+
     def set_defaults(self):
         """ Set class default values if they are not defined. """
         if not self.attrs.get("name"):
             module = self.attrs["__module__"]
-            self.attrs["name"] = '.'.join([sys.modules[module].__name__, 
+            self.attrs["name"] = '.'.join([sys.modules[module].__name__,
                                           self.clsname])
 
     def process_flags(self):
@@ -153,29 +153,29 @@ class Builder(object):
                 set(self.attrs['unassignable_attrs'])
         ALWAYS_UNASSIGNABLE_ATTRS = config.names.ALWAYS_UNASSIGNABLE_ATTRS
         self.attrs['unassignable_attrs_set'].update(ALWAYS_UNASSIGNABLE_ATTRS)
-        
+
     def initialize_objects(self):
         # Add some default objects that should always be present.
         if 'builtin_objects' not in self.attrs:
             self.attrs['builtin_objects'] = {}
-        
+
 
 
 #==============================================================================#
 class DialectMeta(type):
-    """ Meta class for dialects.  This ensures that Dialects possess all the 
-        attributes the rest of the library expects.  It also registers the new 
-        dialect. 
+    """ Meta class for dialects.  This ensures that Dialects possess all the
+        attributes the rest of the library expects.  It also registers the new
+        dialect.
     """
     def __new__(mcls, clsname, bases, attrs):
         from .defobjects import deffunc
-        
+
         new = super(DialectMeta, mcls).__new__
         attrs['_locked'] = False
         builder = Builder(clsname, bases, attrs)
         attrs = builder()
         dialect_cls = new(mcls, clsname, bases, attrs)
-        
+
         dialect_cls.builtin_objects['getattr'] = deffunc(dialect_cls.getattr)
         dialect_cls.builtin_objects['hasattr'] = deffunc(dialect_cls.hasattr)
         dialect_cls.builtin_objects['setattr'] = deffunc(dialect_cls.setattr)
@@ -188,20 +188,20 @@ class DialectMeta(type):
         return dialect_cls
 
     def __call__(cls, *args, **kwargs):
-        # Constructing an instance of the class always returns the same 
-        # instance.  It is the registry's job to maintain the single instance.  
+        # Constructing an instance of the class always returns the same
+        # instance.  It is the registry's job to maintain the single instance.
         # The registry will call _construct() when it constructs the instance.
         return registry.dialects[cls.name]
-            
+
     def __setattr__(cls, name, value):
         if cls._locked:
             raise RuntimeError('A Dialect is immutable.  It cannot be modified once created.')
         else:
             super(DialectMeta, cls).__setattr__(name, value)
-            
+
     def _construct(cls, *args, **kwargs):
-        # Construct an instance of the class.  This is separated from 
-        # __call__() on purpose.  It is called from the registry when an 
+        # Construct an instance of the class.  This is separated from
+        # __call__() on purpose.  It is called from the registry when an
         # instance needs to be created.
         inst = super(DialectMeta, cls).__call__(*args, **kwargs)
         inst._locked_inst = True

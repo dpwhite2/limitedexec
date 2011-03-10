@@ -32,9 +32,9 @@ class Script(object):
         with self.env_factory(globals, locals) as env:
             res = Result()
             try:
-                # In CPython, if __builtins__ is not in globals, the current 
-                # globals are copied into the globals dict before executing the 
-                # expression.  This is not what we want, so we provide 
+                # In CPython, if __builtins__ is not in globals, the current
+                # globals are copied into the globals dict before executing the
+                # expression.  This is not what we want, so we provide
                 # __builtins__ ourselves.
                 env.globals['__builtins__'] = __builtin__
                 res.result = eval(self.code, env.globals, env.locals)
@@ -42,7 +42,7 @@ class Script(object):
                 # TODO: reraise the exception, or catch it?
                 res.exc_info = sys.exc_info()
                 res.exception = True
-                
+
             res.globals = env.globals.copy()
             res.locals = env.locals.copy()
 
@@ -50,4 +50,3 @@ class Script(object):
 
 
 #==============================================================================#
-

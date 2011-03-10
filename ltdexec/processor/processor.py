@@ -6,10 +6,10 @@ Processors that handle a script before it is compiled.
 
 """
 class Processor(object):
-    """ Perform modifications and checks of a script before it is compiled. 
-    
-        A Processor has the opportunity to modify and validate the raw source 
-        code and the compiled abstract syntax tree. 
+    """ Perform modifications and checks of a script before it is compiled.
+
+        A Processor has the opportunity to modify and validate the raw source
+        code and the compiled abstract syntax tree.
     """
     def __init__(self, dialect):
         self.dialect = dialect
@@ -66,7 +66,6 @@ class SplitSourceProcessor(Processor):
         validator(ast_tree)
         ast_tree = transform.postcheck_transform(ast_tree)
         return ast_tree
-
 
 
 

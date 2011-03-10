@@ -107,4 +107,3 @@ node_traits = dict((t.name, t) for t in node_traits)
 del T
 
 
-

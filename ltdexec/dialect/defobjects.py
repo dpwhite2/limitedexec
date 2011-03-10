@@ -1,7 +1,7 @@
 from functools import wraps
 
 #==============================================================================#
-# The following are used when defining what objects appear in a Dialect's 
+# The following are used when defining what objects appear in a Dialect's
 # namespace.
 
 class defname(object):
@@ -10,21 +10,20 @@ class defname(object):
         self.args = args or []
         self.kwargs = kwargs or {}
         self.method_on_close = method_on_close or ''
-        
+
     def construct(self):
         return self.callable(*self.args, **self.kwargs)
-    
+
 
 def wrap_function(func):
     @wraps(func)
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
     return _wrapper
-    
+
 
 class deffunc(defname):
     def __init__(self, function):
         super(deffunc, self).__init__(wrap_function, args=[function])
 
 #==============================================================================#
-

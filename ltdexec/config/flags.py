@@ -71,30 +71,30 @@ NodeTraits = namedtuple('NodeTraits','name default node category')
 class StmtTraits(NodeTraits):
     def __new__(cls, name, default, node):
         category = 'statement'
-        return super(StmtTraits, cls).__new__(cls, name, default, node, 
+        return super(StmtTraits, cls).__new__(cls, name, default, node,
                                               category)
 class ExprTraits(NodeTraits):
     def __new__(cls, name, default, node):
         category = 'expression'
-        return super(ExprTraits, cls).__new__(cls, name, default, node, 
+        return super(ExprTraits, cls).__new__(cls, name, default, node,
                                               category)
 BuiltinTraits = namedtuple('BuiltinTraits','name default builtin_name category')
 class BuiltinTraits(BuiltinTraits):
     def __new__(cls, name, default, builtin_name):
-        return super(BuiltinTraits, cls).__new__(cls, name, default, 
+        return super(BuiltinTraits, cls).__new__(cls, name, default,
                                                  builtin_name, 'builtin')
 
 ModuleTraits = namedtuple('ModuleTraits','name default module_name category')
 class ModuleTraits(ModuleTraits):
     def __new__(cls, name, default, module_name):
-        return super(ModuleTraits, cls).__new__(cls, name, default, 
+        return super(ModuleTraits, cls).__new__(cls, name, default,
                                                 module_name, 'module')
 
 AttributeTraits = namedtuple('AttributeTraits',
                              'name default attr_name category')
 class AttributeTraits(AttributeTraits):
     def __new__(cls, name, default, attr_name):
-        return super(AttributeTraits, cls).__new__(cls, name, default, 
+        return super(AttributeTraits, cls).__new__(cls, name, default,
                                                    attr_name, 'attribute')
 
 MiscTraits = namedtuple('MiscTraits','name default')
@@ -133,7 +133,7 @@ expression_leafflag_traits = [
     T('allow_expression_yield', True, 'Yield'),
     T('allow_expression_lambda', True, 'Lambda'),
 ]
-expression_leafflag_traits = dict((t.name, t) 
+expression_leafflag_traits = dict((t.name, t)
                                   for t in expression_leafflag_traits)
 node_leafflag_traits = statement_leafflag_traits.copy()
 node_leafflag_traits.update(expression_leafflag_traits)

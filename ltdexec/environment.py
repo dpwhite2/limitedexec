@@ -6,14 +6,14 @@ from .dialect import util as dialect_util
 
 #==============================================================================#
 class Environment(object):
-    """ A script is executed in an Environment.  This contains the globals and 
-        locals dicts that are available to the script when it begins execution. 
+    """ A script is executed in an Environment.  This contains the globals and
+        locals dicts that are available to the script when it begins execution.
     """
     def __init__(self, objects, globals, locals):
         assert isinstance(objects, dict)
         assert isinstance(globals, dict)
         assert isinstance(locals, dict)
-        
+
         self.metadata = {}
         self.key = wrapper.create_envkey()
         _globals = {}
@@ -33,14 +33,14 @@ class Environment(object):
                     pass
             wrapper.pop_envkey(self.key)
             raise exc[0], exc[1], exc[2]
-             
+
         _globals.update(globals)
 
         self.globals = _globals
         self.locals = locals
         self.modules = {}
         # TODO: put custom import function into globals
-        
+
     def _close_object(self, name, obj):
         try:
             obj._LX_unlock(key)
@@ -52,8 +52,8 @@ class Environment(object):
                 self.metadata.pop(name)  # pop the metadata so we don't close the same object twice
 
     def close(self):
-        """ Called when a script has completed execution.  Any cleanup required 
-            by the environment members should be performed during this call. 
+        """ Called when a script has completed execution.  Any cleanup required
+            by the environment members should be performed during this call.
         """
         key = self.key
         exc = None
@@ -84,8 +84,8 @@ class Environment(object):
 
 #==============================================================================#
 class EnvironmentFactory(object):
-    """ A Script contains an EnvironmentFactory, which it uses to construct the 
-        Environment each time it runs. 
+    """ A Script contains an EnvironmentFactory, which it uses to construct the
+        Environment each time it runs.
     """
     Environment = Environment
 
@@ -105,7 +105,6 @@ class EnvironmentFactory(object):
 
 
 #==============================================================================#
-
 
 
 

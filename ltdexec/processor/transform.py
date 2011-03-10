@@ -2,7 +2,7 @@
 ltdexec.processor.transform
 ===========================
 
-Transform classes modify the raw source code or the abstract syntax tree before 
+Transform classes modify the raw source code or the abstract syntax tree before
 it has been compiled.
 
 """

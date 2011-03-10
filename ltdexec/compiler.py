@@ -27,16 +27,16 @@ class BaseCompiler(object):
             raise
         script = self.script_factory(source, code)
         return script
-        
+
     def do_compile(self, src, filename):
         raise NotImplementedError()
 
     def compile_to_ast(self, src, filename, mode='exec'):
-        return __builtin__.compile(src, filename, mode, 
+        return __builtin__.compile(src, filename, mode,
                                    flags=ast.PyCF_ONLY_AST)
 
     def compile_to_code(self, ast_tree, filename):
-        # TODO: if root is Module, compile using 'exec'; 
+        # TODO: if root is Module, compile using 'exec';
         #       if root is Expression, compile using 'eval'
         if isinstance(ast_tree, ast.Module):
             mode = 'exec'
@@ -92,5 +92,4 @@ class SplitSourceCompiler(BaseCompiler):
         return self.processor.process_ast(tree)
 
 #==============================================================================#
-
 

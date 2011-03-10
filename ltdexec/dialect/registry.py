@@ -23,7 +23,7 @@ class DialectRegistry(object):
         except KeyError:
             self.dialects[name] = self.dialect_classes[name]._construct()
             return self.dialects[name]
-            
+
     def get_class(self, name):
         return self.dialect_classes[name]
 

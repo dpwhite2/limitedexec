@@ -53,7 +53,7 @@ class DefaultAstValidator_TestCase(LtdExec_TestCaseBase):
         tree = ast.parse("x = a.__name__")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
     def test_private_prefix_name(self):
         tree = ast.parse("_LX_not_allowed")
         with self.assertRaises(exceptions.SyntaxError) as cm:
@@ -61,7 +61,7 @@ class DefaultAstValidator_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('private_prefix_name', cm.exception.reason)
-        
+
     def test_private_prefix_attr(self):
         tree = ast.parse("a._LX_not_allowed")
         with self.assertRaises(exceptions.SyntaxError) as cm:
@@ -69,7 +69,7 @@ class DefaultAstValidator_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('private_prefix_attr', cm.exception.reason)
-        
+
 
 
 #==============================================================================#
@@ -101,7 +101,7 @@ class ImportsDialectAstValidator_TestCase(LtdExec_TestCaseBase):
         tree = ast.parse("from package import name")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
     def test_forbidden_name_import(self):
         tree = ast.parse("import type")
         with self.assertRaises(exceptions.SyntaxError) as cm:
@@ -109,21 +109,21 @@ class ImportsDialectAstValidator_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('import_forbidden_name', cm.exception.reason)
-        
+
         tree = ast.parse("from module import type")
         with self.assertRaises(exceptions.SyntaxError) as cm:
             self.validator(tree)
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('import_forbidden_name', cm.exception.reason)
-        
+
         tree = ast.parse("from module import abc as type")
         with self.assertRaises(exceptions.SyntaxError) as cm:
             self.validator(tree)
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('import_forbidden_name', cm.exception.reason)
-        
+
     def test_relative_import(self):
         tree = ast.parse("from . import name")
         with self.assertRaises(exceptions.SyntaxError) as cm:
@@ -131,21 +131,21 @@ class ImportsDialectAstValidator_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('relative_import', cm.exception.reason)
-        
+
         tree = ast.parse("from .package import name")
         with self.assertRaises(exceptions.SyntaxError) as cm:
             self.validator(tree)
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('relative_import', cm.exception.reason)
-        
+
         tree = ast.parse("from .. import name")
         with self.assertRaises(exceptions.SyntaxError) as cm:
             self.validator(tree)
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('relative_import', cm.exception.reason)
-        
+
 
 #==============================================================================#
 class ImportsDialectAstValidator2_TestCase(LtdExec_TestCaseBase):
@@ -178,7 +178,7 @@ class ImportsDialectAstValidator2_TestCase(LtdExec_TestCaseBase):
         tree = ast.parse("from math import sin")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
     def test_import_not_allowed(self):
         tree = ast.parse("import sys")
         with self.assertRaises(exceptions.SyntaxError) as cm:
@@ -186,7 +186,7 @@ class ImportsDialectAstValidator2_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('not_in_allowed_imports', cm.exception.reason)
-        
+
         tree = ast.parse("from sys import names")
         with self.assertRaises(exceptions.SyntaxError) as cm:
             self.validator(tree)
@@ -223,7 +223,7 @@ class ImportsDialectAstValidator3_TestCase(LtdExec_TestCaseBase):
         tree = ast.parse("from math import cos")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
     def test_import_forbidden(self):
         tree = ast.parse("import sys")
         with self.assertRaises(exceptions.SyntaxError) as cm:
@@ -231,14 +231,14 @@ class ImportsDialectAstValidator3_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('forbidden_import', cm.exception.reason)
-        
+
         tree = ast.parse("from sys import names")
         with self.assertRaises(exceptions.SyntaxError) as cm:
             self.validator(tree)
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('forbidden_import', cm.exception.reason)
-        
+
 
 #==============================================================================#
 class ImportsDialectAstValidator4_TestCase(LtdExec_TestCaseBase):
@@ -268,11 +268,11 @@ class ImportsDialectAstValidator4_TestCase(LtdExec_TestCaseBase):
         tree = ast.parse("import math")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("import sys")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("from sys import exc_info")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
@@ -280,7 +280,7 @@ class ImportsDialectAstValidator4_TestCase(LtdExec_TestCaseBase):
         tree = ast.parse("from sys import exc_info, version_info")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
     def test_import_not_allowed(self):
         tree = ast.parse("from sys import path")
         with self.assertRaises(exceptions.SyntaxError) as cm:
@@ -288,7 +288,7 @@ class ImportsDialectAstValidator4_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('not_in_allowed_imports_froms', cm.exception.reason)
-        
+
         tree = ast.parse("from sys import exc_info, exit")
         with self.assertRaises(exceptions.SyntaxError) as cm:
             self.validator(tree)
@@ -316,31 +316,31 @@ class NoDoubleUnderscoreNames_AstValidator_TestCase(LtdExec_TestCaseBase):
         tree = ast.parse("name")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("__name")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("name__")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("_name_")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("__name_")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("_name__")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("_")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("a.__attr__")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
@@ -352,21 +352,21 @@ class NoDoubleUnderscoreNames_AstValidator_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('double_underscore_name', cm.exception.reason)
-        
+
         tree = ast.parse("__")
         with self.assertRaises(exceptions.SyntaxError) as cm:
             self.validator(tree)
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('double_underscore_name', cm.exception.reason)
-        
+
         tree = ast.parse("___xtra_underscores___")
         with self.assertRaises(exceptions.SyntaxError) as cm:
             self.validator(tree)
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('double_underscore_name', cm.exception.reason)
-        
+
         tree = ast.parse("__abc__.__attr__")
         with self.assertRaises(exceptions.SyntaxError) as cm:
             self.validator(tree)
@@ -394,31 +394,31 @@ class NoDoubleUnderscoreAttrs_AstValidator_TestCase(LtdExec_TestCaseBase):
         tree = ast.parse("a.name")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("a.__name")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("a.name__")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("a._name_")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("a.__name_")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("a._name__")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("a._")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
-        
+
         tree = ast.parse("__abc__")
         self.validator(tree)
         self.assertTrue('Good.  No exception was thrown.')
@@ -430,24 +430,23 @@ class NoDoubleUnderscoreAttrs_AstValidator_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('double_underscore_attr', cm.exception.reason)
-        
+
         tree = ast.parse("a.__")
         with self.assertRaises(exceptions.SyntaxError) as cm:
             self.validator(tree)
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('double_underscore_attr', cm.exception.reason)
-        
+
         tree = ast.parse("a.___xtra_underscores___")
         with self.assertRaises(exceptions.SyntaxError) as cm:
             self.validator(tree)
         self.assertEquals(1, cm.exception.lineno)
         self.assertEquals(0, cm.exception.offset)
         self.assertEquals('double_underscore_attr', cm.exception.reason)
-    
+
 
 #==============================================================================#
-
 
 
 

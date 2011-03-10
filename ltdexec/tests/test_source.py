@@ -18,7 +18,7 @@ class Source_TestCase(LtdExec_TestCaseBase):
         with self.assertRaises(IndexError) as cm:
             source[0]
         self.assertEquals('', str(source))
-        
+
     def test_one_line(self):
         text = 'x = 5'
         filename = 'FILE'
@@ -30,7 +30,7 @@ class Source_TestCase(LtdExec_TestCaseBase):
         with self.assertRaises(IndexError) as cm:
             source[0]
         self.assertEquals('x = 5', str(source))
-        
+
     def test_two_lines(self):
         text = 'x = 5\ny = 7'
         filename = 'FILE'
@@ -44,4 +44,3 @@ class Source_TestCase(LtdExec_TestCaseBase):
         with self.assertRaises(IndexError) as cm:
             source[0]
         self.assertEquals('x = 5\ny = 7', str(source))
-

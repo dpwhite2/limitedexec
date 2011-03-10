@@ -28,7 +28,7 @@ class WrapperBase(object):
     _LX_delay_lock = False
     _LX_read_lockable = False
     _LX_write_lockable = True
-    
+
     def __init__(self):
         self._LX_lockable = self._LX_read_lockable or self._LX_write_lockable
         if self._LX_lockable and not self._LX_delay_lock and _local.key_stack:
@@ -51,7 +51,7 @@ class WrapperBase(object):
                 self._LX_key = None
             else:
                 raise RuntimeError('TODO')
-                
+
     def _LX_check_read_lock(self):
         if self._LX_read_lockable and self._LX_key:
             raise RuntimeError('TODO')
@@ -61,7 +61,7 @@ class Wrapper(object):
     def __init__(self, obj):
         super(Wrapper, self).__setattr__('_LX_obj', obj)
         super(Wrapper, self).__init__()
-    
+
     def __getattribute__(self, name):
         if name.startswith('_LX_'):
             return super(Wrapper, self).__getattribute__(name)
@@ -77,7 +77,7 @@ class Wrapper(object):
             obj = super(Wrapper, self).__getattribute__('_LX_obj')
             val = getattr(obj, name)
         return val
-            
+
     def __setattr__(self, name, val):
         if name.startswith('_LX_'):
             super(Wrapper, self).__setattr__(name, val)
@@ -99,7 +99,7 @@ class Wrapper(object):
 class WrapperBase(object):
     _LX_lockable = True
     _LX_delay_lock = False
-    
+
     def __init__(self):
         if self._LX_lockable and not self._LX_delay_lock and _local.key_stack:
             self._LX_lock(_local.key_stack[-1])
@@ -119,7 +119,7 @@ class WrapperBase(object):
                 super(WrapperBase, self).__setattr__('_LX_key', None)
             else:
                 raise RuntimeError('TODO')
-                
+
     def __setattr__(self, name, val):
         if name.startswith('_LX_') or not self._LX_key:
             super(WrapperBase, self).__setattr__(name, val)
@@ -134,7 +134,7 @@ class FunctionWrapper(object):
         self.__name__ = func.__name__
         self.__doc__ = func.__doc__
         self._LX_locked = True
-        
+
     def __setattr__(self, name, val):
         if name.startswith('_LX_'):
             super(FunctionWrapper, self).__setattr__(name, val)
@@ -144,10 +144,9 @@ class FunctionWrapper(object):
             super(FunctionWrapper, self).__setattr__(name, val)
         else:
             setattr(self._LX_func, name, val)
-        
+
     def __call__(self, *args, **kwargs):
         return self._LX_func(*args, **kwargs)
-    
+
 
 #==============================================================================#
-

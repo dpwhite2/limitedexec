@@ -80,12 +80,12 @@ class Dialect_TestCase(LtdExec_TestCaseBase):
 
     def test_dialect_name(self):
         self.assertEquals('ltdexec.dialect.base.Dialect', Dialect.name)
-        
+
     def test_getattr(self):
         obj = Struct()
         obj.abc = 123
         obj._LX_forbidden = 456
-        
+
         self.assertEquals(123, Dialect.getattr(obj, 'abc'))
         self.assertEquals(None, Dialect.getattr(obj, 'efg', None))
         with self.assertRaises(AttributeError) as cm:
@@ -94,39 +94,39 @@ class Dialect_TestCase(LtdExec_TestCaseBase):
             Dialect.getattr(obj, '_LX_forbidden')
         with self.assertRaises(RuntimeError) as cm:
             Dialect.getattr(obj, '__class__')
-        
+
     def test_hasattr(self):
         obj = Struct()
         obj.abc = 123
         obj._LX_forbidden = 456
-        
+
         self.assertTrue(Dialect.hasattr(obj, 'abc'))
         self.assertFalse(Dialect.hasattr(obj, 'efg'))
         with self.assertRaises(RuntimeError) as cm:
             Dialect.hasattr(obj, '_LX_forbidden')
         with self.assertRaises(RuntimeError) as cm:
             Dialect.hasattr(obj, '__class__')
-        
+
     def test_setattr(self):
         obj = Struct()
         obj.abc = 123
         obj._LX_forbidden = 456
-        
+
         Dialect.setattr(obj, 'abc', 321)
         self.assertTrue(321, obj.abc)
         Dialect.setattr(obj, 'efg', 'xyz')
         self.assertTrue('xyz', obj.efg)
-        
+
         with self.assertRaises(RuntimeError) as cm:
             Dialect.setattr(obj, '_LX_forbidden', 101)
         with self.assertRaises(RuntimeError) as cm:
             Dialect.setattr(obj, '__class__', 'what a class!')
-        
+
     def test_delattr(self):
         obj = Struct()
         obj.abc = 123
         obj._LX_forbidden = 456
-        
+
         Dialect.delattr(obj, 'abc')
         self.assertFalse(hasattr(obj, 'abc'))
         with self.assertRaises(AttributeError) as cm:
@@ -135,8 +135,8 @@ class Dialect_TestCase(LtdExec_TestCaseBase):
             Dialect.delattr(obj, '_LX_forbidden')
         with self.assertRaises(RuntimeError) as cm:
             Dialect.delattr(obj, '__class__')
-        
-        
+
+
 
 #==============================================================================#
 class EmptyCustomDialect_TestCase(LtdExec_TestCaseBase):
