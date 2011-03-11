@@ -1,5 +1,6 @@
 
 
+#==============================================================================#
 class Source(object):
     def __init__(self, source, filename):
         self.lines = source.splitlines() or ['']
@@ -44,4 +45,5 @@ class Source(object):
     def __repr__(self):
         return '<Source: filename={0}, lines={1}>'.format(self.filename, len(self.lines))
 
+#==============================================================================#
 

@@ -168,7 +168,7 @@ class DialectMeta(type):
         dialect.
     """
     def __new__(mcls, clsname, bases, attrs):
-        from .defobjects import deffunc
+        from ..wrapper import deffunc
 
         new = super(DialectMeta, mcls).__new__
         attrs['_locked'] = False

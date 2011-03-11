@@ -1,10 +1,11 @@
 import unittest
 
 from ltdexec.environment import Environment, EnvironmentFactory
-from ltdexec.dialect import Dialect, defname, deffunc
+from ltdexec.dialect import Dialect
 from ltdexec import wrapper
 
 from .base import LtdExec_TestCaseBase
+from .util import TestObj, ThrowingTestObj, ThrowsOnClose
 
 #==============================================================================#
 class EnvironmentFactory_TestCase(LtdExec_TestCaseBase):
@@ -16,35 +17,6 @@ class EnvironmentFactory_TestCase(LtdExec_TestCaseBase):
         env.close()
 
 #==============================================================================#
-class TestObj(object):
-    initialized = False
-    closed = False
-    instances = {}
-    def __init__(self, name=None):
-        self.name = name
-        self.initialized = True
-        self.add_instance(name, self)
-
-    def close(self):
-        self.closed = True
-
-    @classmethod
-    def clear_instances(cls):
-        cls.instances = {}
-    @classmethod
-    def add_instance(cls, name, obj):
-        cls.instances[name] = obj
-
-class ThrowingTestObj(TestObj):
-    def __init__(self, name=None):
-        self.add_instance(name, self)
-        raise RuntimeError('ThrowingTestObj')
-
-class ThrowsOnClose(TestObj):
-    def close(self):
-        raise RuntimeError('ThrowsOnClose')
-
-
 class Environment_TestCase(LtdExec_TestCaseBase):
 
     def test_basic(self):
@@ -58,8 +30,8 @@ class Environment_TestCase(LtdExec_TestCaseBase):
 
     def test_simple_objects(self):
         objects = {
-            'a': defname(TestObj),
-            'b': defname(TestObj, method_on_close='close'),
+            'a': wrapper.defname(TestObj),
+            'b': wrapper.defname(TestObj, method_on_close='close'),
             }
         self.assertEquals(0, len(wrapper._local.key_stack))
         environment = Environment(objects, {}, {})
@@ -80,10 +52,10 @@ class Environment_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(['a','c','b','d'], {'a':0,'b':0,'c':0,'d':0}.keys())
         TestObj.clear_instances()
         objects = {
-            'a': defname(TestObj, args=['a']),
-            'c': defname(TestObj, args=['c'], method_on_close='close'),
-            'b': defname(ThrowingTestObj, args=['b'], method_on_close='close'),
-            'd': defname(TestObj, args=['d']),
+            'a': wrapper.defname(TestObj, args=['a']),
+            'c': wrapper.defname(TestObj, args=['c'], method_on_close='close'),
+            'b': wrapper.defname(ThrowingTestObj, args=['b'], method_on_close='close'),
+            'd': wrapper.defname(TestObj, args=['d']),
             }
         self.assertEquals(0, len(wrapper._local.key_stack))
         with self.assertRaises(RuntimeError) as cm:
@@ -103,10 +75,10 @@ class Environment_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(['a','c','b','d'], {'a':0,'b':0,'c':0,'d':0}.keys())
         TestObj.clear_instances()
         objects = {
-            'a': defname(ThrowsOnClose, args=['a'], method_on_close='close'),
-            'c': defname(TestObj, args=['c'], method_on_close='close'),
-            'b': defname(ThrowingTestObj, args=['b'], method_on_close='close'),
-            'd': defname(TestObj, args=['d']),
+            'a': wrapper.defname(ThrowsOnClose, args=['a'], method_on_close='close'),
+            'c': wrapper.defname(TestObj, args=['c'], method_on_close='close'),
+            'b': wrapper.defname(ThrowingTestObj, args=['b'], method_on_close='close'),
+            'd': wrapper.defname(TestObj, args=['d']),
             }
         self.assertEquals(0, len(wrapper._local.key_stack))
         with self.assertRaises(RuntimeError) as cm:
@@ -128,10 +100,10 @@ class Environment_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(['a','c','b','d'], {'a':0,'b':0,'c':0,'d':0}.keys())
         TestObj.clear_instances()
         objects = {
-            'a': defname(ThrowsOnClose, args=['a'], method_on_close='close'),
-            'c': defname(TestObj, args=['c'], method_on_close='close'),
-            'b': defname(TestObj, args=['b'], method_on_close='close'),
-            'd': defname(TestObj, args=['d']),
+            'a': wrapper.defname(ThrowsOnClose, args=['a'], method_on_close='close'),
+            'c': wrapper.defname(TestObj, args=['c'], method_on_close='close'),
+            'b': wrapper.defname(TestObj, args=['b'], method_on_close='close'),
+            'd': wrapper.defname(TestObj, args=['d']),
             }
         self.assertEquals(0, len(wrapper._local.key_stack))
 

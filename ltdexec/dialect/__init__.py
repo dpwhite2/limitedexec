@@ -1,9 +1,9 @@
-from . import registry, defobjects
+from . import registry
 from . import base
 
 Dialect = base.Dialect
-deffunc = defobjects.deffunc
-defname = defobjects.defname
+#deffunc = defobjects.deffunc
+#defname = defobjects.defname
 
-del defobjects
+#del defobjects
 del base

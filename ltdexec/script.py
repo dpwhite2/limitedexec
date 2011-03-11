@@ -29,6 +29,10 @@ class Script(object):
         globals = globals or {}
         locals = locals or {}
 
+        # Exceptions due to initializing the Environment will propogate.  This 
+        # is expected because such exceptions are *not* due to the script 
+        # itself.  The source is instead the result of the `objects` attribute 
+        # of the Dialect.
         with self.env_factory(globals, locals) as env:
             res = Result()
             try:
