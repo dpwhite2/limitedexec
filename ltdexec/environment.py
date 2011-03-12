@@ -82,12 +82,16 @@ class Environment(object):
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
         
-    def import_module(self, modname, froms=None):
+    def import_module(self, modname, asname=None, froms=None):
         self.load_module(modname)
         if froms:
             mod = self.modules[modname]
-            for name in froms:
-                self.globals[name] = getattr(mod, name)
+            for name,asname in froms:
+                asname = asname or name
+                self.globals[asname] = getattr(mod, name)
+        elif asname:
+            mod = self.modules[modname]
+            self.globals[asname] = mod
         else:
             toplevel = modname.partition('.')[0]
             mod = self.modules[toplevel]
