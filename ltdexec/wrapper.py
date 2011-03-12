@@ -2,6 +2,7 @@ import threading
 import uuid
 import types
 import functools
+import sys
 
 #==============================================================================#
 _local = threading.local()
@@ -146,107 +147,60 @@ class WrapperBase(object):
                 return setattr(obj, name, value)
 
 
-# class WrapperBase(object):
-    # _LX_delay_lock = False
-    # _LX_read_lockable = False
-    # _LX_write_lockable = True
-
-    # def __init__(self):
-        # self._LX_lockable = self._LX_read_lockable or self._LX_write_lockable
-        # if self._LX_lockable and not self._LX_delay_lock and _local.key_stack:
-            # self._LX_lock(_local.key_stack[-1])
-
-    # def _LX_lock(self, key):
-        # if self._LX_lockable:
-            # if not key:
-                # raise RuntimeError('TODO')
-            # if self._LX_key:
-                # raise RuntimeError('TODO')
-            # if key != _local.key_stack[-1]:
-                # raise RuntimeError('TODO')
-            # self._LX_key = key
-
-    # def _LX_unlock(self, other):
-        # if self._LX_lockable:
-            # key = self._LX_key
-            # if key == other == _local.key_stack[-1]:
-                # self._LX_key = None
-            # else:
-                # raise RuntimeError('TODO')
-
-    # def _LX_check_read_lock(self):
-        # if self._LX_read_lockable and self._LX_key:
-            # raise RuntimeError('TODO')
-
-
-# class Wrapper(object):
-    # def __init__(self, obj):
-        # super(Wrapper, self).__setattr__('_LX_obj', obj)
-        # super(Wrapper, self).__init__()
-
-    # def __getattribute__(self, name):
-        # if name.startswith('_LX_'):
-            # return super(Wrapper, self).__getattribute__(name)
-        # try:
-            # val = super(Wrapper, self).__getattribute__(name)
-        # except AttributeError:
-            # readable = super(Wrapper, self).__getattribute__('_LX_readable_attrs')
-            # unreadable = super(Wrapper, self).__getattribute__('_LX_unreadable_attrs')
-            # if readable and name not in readable:
-                # raise RuntimeError('TODO')
-            # elif name in unreadable:
-                # raise RuntimeError('TODO')
-            # obj = super(Wrapper, self).__getattribute__('_LX_obj')
-            # val = getattr(obj, name)
-        # return val
-
-    # def __setattr__(self, name, val):
-        # if name.startswith('_LX_'):
-            # super(Wrapper, self).__setattr__(name, val)
-            # return
-        # try:
-            # super(Wrapper, self).__getattribute__(name)
-            # super(Wrapper, self).__setattr__(name, val)
-        # except AttributeError:
-            # writeable = super(Wrapper, self).__getattribute__('_LX_writeable_attrs')
-            # unwriteable = super(Wrapper, self).__getattribute__('_LX_unwriteable_attrs')
-            # if writeable and name not in writeable:
-                # raise RuntimeError('TODO')
-            # elif name in unwriteable:
-                # raise RuntimeError('TODO')
-            # obj = super(Wrapper, self).__getattribute__('_LX_obj')
-            # setattr(obj, name, val)
-
-
-# class WrapperBase(object):
-    # _LX_lockable = True
-    # _LX_delay_lock = False
-
-    # def __init__(self):
-        # if self._LX_lockable and not self._LX_delay_lock and _local.key_stack:
-            # self._LX_lock(_local.key_stack[-1])
-
-    # def _LX_lock(self, key):
-        # if super(WrapperBase, self).__getattribute__('_LX_lockable'):
-            # if not key:
-                # raise RuntimeError('TODO')
-            # if self._LX_key:
-                # raise RuntimeError('TODO')
-            # self._LX_key = key
-
-    # def _LX_unlock(self, other):
-        # if super(WrapperBase, self).__getattribute__('_LX_lockable'):
-            # key = super(WrapperBase, self).__getattribute__('_LX_key')
-            # if key == other == _local.key_stack[-1]:
-                # super(WrapperBase, self).__setattr__('_LX_key', None)
-            # else:
-                # raise RuntimeError('TODO')
-
-    # def __setattr__(self, name, val):
-        # if name.startswith('_LX_') or not self._LX_key:
-            # super(WrapperBase, self).__setattr__(name, val)
-        # else:
-            # raise RuntimeError('TODO')
+class ModuleWrapper(object):
+    def __init__(self, modname, readable_names=None, unreadable_names=None):
+        # options:  allow all names, forbid names not in __all__, 
+        #   forbid names beginning with underscore, allow listed names, 
+        #   forbid listed names, forbid indirect modules
+        readable_names = readable_names or set()
+        unreadable_names = unreadable_names or set()
+        
+        forbid_underscore_names = True
+        allow_names_in_all = True
+        
+        self._LX_modname = modname
+        __import__(modname, globals(), locals(), [], 0)
+        mod = sys.modules[modname]
+        members = {}
+        for k,v in mod.__dict__.iteritems():
+            if readable_names:
+                if k in readable_names and not isinstance(v, types.ModuleType):
+                    members[k] = v
+            else:
+                if isinstance(v, types.ModuleType):
+                    pass
+                elif k in unreadable_names:
+                    pass
+                elif forbid_underscore_names and k.startswith('_'):
+                    pass
+                elif allow_names_in_all and \
+                  ((mod.__all__ and k not in mod.__all__) or
+                   (not mod.__all__ and k.startswith('_'))):
+                    pass
+                else:
+                    members[k] = v
+        self._LX_members = members
+        
+    def _LX_add_submodule(self, modname, module):
+        assert modname.startswith(self._LX_modname)
+        assert modname == (self._LX_modname + '.' + modname.rpartition('.')[2])
+        name = modname.rpartition('.')
+        self._LX_members[name] = module
+        
+    def __getattribute__(self, name):
+        super_getattr = super(ModuleWrapper, self).__getattribute__
+        if name.startswith('_LX_'):
+            return super_getattr(name)
+        else:
+            return getattr(super_getattr('_LX_members'), name)
+        
+    def __setattr__(self, name, value):
+        if name.startswith('_LX_'):
+            super(ModuleWrapper, self).__setattr__(name, value)
+        else:
+            raise RuntimeError('TODO')
+            
+        
 
 
 #==============================================================================#

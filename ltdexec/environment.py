@@ -13,23 +13,22 @@ class Environment(object):
         assert isinstance(objects, dict)
         assert isinstance(globals, dict)
 
-        self.metadata = {}
+        ##self.metadata = {}
+        self.startup_objects = []
         self.key = wrapper.create_envkey()
         _globals = {}
         try:
             for name, objdef in objects.iteritems():
                 _globals[name] = objdef.construct()
-                self.metadata[name] = {
-                    'id': id(_globals[name]),
-                    'method_on_close': objdef.method_on_close,
-                    }
+                self.startup_objects.append(
+                    (_globals[name], {'method_on_close': objdef.method_on_close,},)
+                    )
         except:
             exc = sys.exc_info()
-            for name, obj in _globals.iteritems():
-                try:
-                    self._close_object(name, obj)
-                except:
-                    pass
+            try:
+                self._close_startup_objects()
+            except:
+                pass
             wrapper.pop_envkey(self.key)
             raise exc[0], exc[1], exc[2]
 
@@ -41,17 +40,27 @@ class Environment(object):
         self.globals = _globals
         self.locals = self.globals
         self.modules = {}
-        # TODO: put custom import function into globals
-
-    def _close_object(self, name, obj):
+        
+        self.globals['_LX_import_module'] = self.import_module
+                
+    def _close_startup_object(self, obj, info):
         try:
-            obj._LX_unlock(key)
+            obj._LX_unlock(self.key)
         except AttributeError:
             pass
         finally:
-            if name in self.metadata and self.metadata[name]['id']==id(obj):
-                getattr(obj, self.metadata[name]['method_on_close'], lambda: None)()
-                self.metadata.pop(name)  # pop the metadata so we don't close the same object twice
+            getattr(obj, info['method_on_close'], lambda: None)()
+                
+    def _close_startup_objects(self):
+        exc = None
+        for obj, info in self.startup_objects:
+            try:
+                self._close_startup_object(obj, info)
+            except:
+                exc = sys.exc_info()
+        self.startup_objects = []
+        if exc:
+            raise exc[0], exc[1], exc[2]
 
     def close(self):
         """ Called when a script has completed execution.  Any cleanup required
@@ -59,29 +68,43 @@ class Environment(object):
         """
         key = self.key
         exc = None
-        for name, obj in self.globals.iteritems():
-            try:
-                self._close_object(name, obj)
-            except:
-                exc = sys.exc_info()
-        for name, obj in self.locals.iteritems():
-            try:
-                self._close_object(name, obj)
-            except:
-                exc = sys.exc_info()
+        try:
+            self._close_startup_objects()
+        except:
+            exc = sys.exc_info()
+        self.globals.pop('_LX_import_module')  # _LX_import_module is an implementation detail
         wrapper.pop_envkey(key)
         if exc:
             raise exc[0], exc[1], exc[2]
-
 
     def __enter__(self):
         return self
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
+        
+    def import_module(self, modname, froms=None):
+        self.load_module(modname)
+        if froms:
+            mod = self.modules[modname]
+            for name in froms:
+                self.globals[name] = getattr(mod, name)
+        else:
+            toplevel = modname.partition('.')[0]
+            mod = self.modules[toplevel]
+            self.globals[toplevel] = mod
 
-    def import_(self):
-        # TODO: custom import function
-        pass
+    def load_module(self, modname):
+        try:
+            return self.modules[modname]
+        except IndexError:
+            pass
+        mod = ModuleWrapper(modname, self.module_settings[modname])
+        parentname = modname.rpartition('.')[0]
+        if parentname:
+            parent = self.load_module(parentname)
+            parent._LX_add_submodule(modname, mod)
+        self.modules[modname] = mod
+        return mod
 
 
 #==============================================================================#
