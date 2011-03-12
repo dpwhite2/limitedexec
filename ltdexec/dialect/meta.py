@@ -195,7 +195,9 @@ class DialectMeta(type):
 
     def __setattr__(cls, name, value):
         if cls._locked:
-            raise RuntimeError('A Dialect is immutable.  It cannot be modified once created.')
+            m = ('A Dialect class is immutable.  '
+                 'It cannot be modified once constructed.')
+            raise exceptions.ImmutableError(m)
         else:
             super(DialectMeta, cls).__setattr__(name, value)
 

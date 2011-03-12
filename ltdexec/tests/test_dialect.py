@@ -2,6 +2,7 @@ import unittest
 
 from ltdexec.dialect.base import Dialect
 from ltdexec.processor.validator import AstValidator
+from ltdexec import exceptions
 
 from .base import LtdExec_TestCaseBase
 
@@ -90,9 +91,9 @@ class Dialect_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(None, Dialect.getattr(obj, 'efg', None))
         with self.assertRaises(AttributeError) as cm:
             Dialect.getattr(obj, 'efg')
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(exceptions.LXPrivateAttrError) as cm:
             Dialect.getattr(obj, '_LX_forbidden')
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(exceptions.ForbiddenAttrError) as cm:
             Dialect.getattr(obj, '__class__')
 
     def test_hasattr(self):
@@ -102,9 +103,9 @@ class Dialect_TestCase(LtdExec_TestCaseBase):
 
         self.assertTrue(Dialect.hasattr(obj, 'abc'))
         self.assertFalse(Dialect.hasattr(obj, 'efg'))
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(exceptions.LXPrivateAttrError) as cm:
             Dialect.hasattr(obj, '_LX_forbidden')
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(exceptions.ForbiddenAttrError) as cm:
             Dialect.hasattr(obj, '__class__')
 
     def test_setattr(self):
@@ -117,9 +118,9 @@ class Dialect_TestCase(LtdExec_TestCaseBase):
         Dialect.setattr(obj, 'efg', 'xyz')
         self.assertTrue('xyz', obj.efg)
 
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(exceptions.LXPrivateAttrError) as cm:
             Dialect.setattr(obj, '_LX_forbidden', 101)
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(exceptions.ForbiddenAttrError) as cm:
             Dialect.setattr(obj, '__class__', 'what a class!')
 
     def test_delattr(self):
@@ -131,9 +132,9 @@ class Dialect_TestCase(LtdExec_TestCaseBase):
         self.assertFalse(hasattr(obj, 'abc'))
         with self.assertRaises(AttributeError) as cm:
             Dialect.delattr(obj, 'efg')
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(exceptions.LXPrivateAttrError) as cm:
             Dialect.delattr(obj, '_LX_forbidden')
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(exceptions.ForbiddenAttrError) as cm:
             Dialect.delattr(obj, '__class__')
 
 
@@ -214,5 +215,16 @@ class CustomDialect_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(False, MyDialect.allow_statement_return)
         self.assertEquals(True, MyDialect.allow_expression_yield)
         self.assertEquals(True, MyDialect.allow_expression_lambda)
+        
+    def test_immutable(self):
+        class MyDialect(Dialect):
+            pass
+            
+        with self.assertRaises(exceptions.ImmutableError) as cm:
+            MyDialect.allow_statement_def = True
+        
+        mydialect = MyDialect()
+        with self.assertRaises(exceptions.ImmutableError) as cm:
+            mydialect.allow_statement_def = True
 
 #==============================================================================#

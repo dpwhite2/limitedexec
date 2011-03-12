@@ -1,7 +1,10 @@
 import ast
+import sys
 import __builtin__
 
+from . import exceptions
 from .source import Source
+from .script import Script
 
 #==============================================================================#
 def compile(source, filename, dialect):
@@ -14,7 +17,8 @@ def compile(source, filename, dialect):
 class BaseCompiler(object):
 
     def __init__(self, dialect):
-        self.dialect = dialect
+        from .dialect import util as dialect_util
+        self.dialect = dialect_util.get_dialect_object(dialect)
         self.processor = dialect.Processor(dialect)
 
     def __call__(self, src, filename):
@@ -22,11 +26,17 @@ class BaseCompiler(object):
         source = Source(src, filename)
         try:
             code = self.do_compile(src, filename)
+        except SyntaxError:
+            typ, e, tb = sys.exc_info()
+            if e.filename == '<ltdexec_script>':
+                e.filename = filename
+                e.text = source[e.lineno] + '\n'
+            raise exceptions.CompilationError((typ,e,tb), source, 
+                                              sanitize=False)
         except:
-            # TODO: reraise exception with additional info
-            raise
-        script = self.script_factory(source, code)
-        return script
+            raise exceptions.CompilationError(sys.exc_info(), source, 
+                                              sanitize=False)
+        return self.script_factory(source, code)
 
     def do_compile(self, src, filename):
         raise NotImplementedError()
@@ -36,19 +46,16 @@ class BaseCompiler(object):
                                    flags=ast.PyCF_ONLY_AST)
 
     def compile_to_code(self, ast_tree, filename):
-        # TODO: if root is Module, compile using 'exec';
-        #       if root is Expression, compile using 'eval'
         if isinstance(ast_tree, ast.Module):
             mode = 'exec'
         elif isinstance(ast_tree, ast.Expression):
             mode = 'eval'
         else:
-            raise RuntimeError('TODO')
+            raise RuntimeError('TODO')  # ValueError?
         return __builtin__.compile(ast_tree, filename, mode)
 
     def script_factory(self, source, code):
-        EnvironmentFactory = self.dialect.environment_factory_class()
-        return Script(code, source, EnvironmentFactory(self.dialect))
+        return Script(code, source, self.dialect)
 
 
 #==============================================================================#

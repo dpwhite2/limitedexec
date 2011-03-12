@@ -42,7 +42,7 @@ class Script_TestCase(LtdExec_TestCaseBase):
         result = my_script.run()
 
         self.assertEquals(11, result.result)
-        self.assertEquals(0, len(result.locals))
+        #self.assertEquals(0, len(result.locals))
 
     def test_simple_raise_exception(self):
         text = 'raise RuntimeError("I raised it!")'

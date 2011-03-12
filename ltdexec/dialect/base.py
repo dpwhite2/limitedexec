@@ -1,7 +1,7 @@
 import __builtin__
 
 from . import registry, meta
-from .. import config
+from .. import config, exceptions
 
 
 
@@ -16,7 +16,9 @@ class _DialectBase(object):
 
     def __setattr__(self, name, val):
         if getattr(self, '_locked_inst', False):
-            raise RuntimeError('A Dialect class instance is immutable.  It cannot be modified once constructed.')
+            m = ('A Dialect class instance is immutable.  '
+                 'It cannot be modified once constructed.')
+            raise exceptions.ImmutableError(m)
         else:
             return super(_DialectBase, self).__setattr__(name, val)
 
@@ -106,9 +108,11 @@ class Dialect(_DialectBase):
             permissible.
         """
         if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
-            raise RuntimeError('TODO')
+            m = 'Cannot access attribute "{0}".'.format(name)
+            raise exceptions.LXPrivateAttrError(m)
         elif name in cls.forbidden_attrs_set:
-            raise RuntimeError('TODO')
+            m = 'Cannot access attribute "{0}".'.format(name)
+            raise exceptions.ForbiddenAttrError(m)
         return __builtin__.getattr(obj, name, *args)
 
     @classmethod
@@ -118,9 +122,11 @@ class Dialect(_DialectBase):
             permissible.
         """
         if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
-            raise RuntimeError('TODO')
+            m = 'Cannot access attribute "{0}".'.format(name)
+            raise exceptions.LXPrivateAttrError(m)
         elif name in cls.forbidden_attrs_set:
-            raise RuntimeError('TODO')
+            m = 'Cannot access attribute "{0}".'.format(name)
+            raise exceptions.ForbiddenAttrError(m)
         return __builtin__.hasattr(obj, name)
 
     @classmethod
@@ -130,11 +136,14 @@ class Dialect(_DialectBase):
             permissible.
         """
         if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
-            raise RuntimeError('TODO')
+            m = 'Cannot access attribute "{0}".'.format(name)
+            raise exceptions.LXPrivateAttrError(m)
         elif name in cls.forbidden_attrs_set:
-            raise RuntimeError('TODO')
+            m = 'Cannot access attribute "{0}".'.format(name)
+            raise exceptions.ForbiddenAttrError(m)
         elif name in cls.unassignable_attrs_set:
-            raise RuntimeError('TODO')
+            m = 'Cannot assign to attribute "{0}".'.format(name)
+            raise exceptions.UnassignableAttrError(m)
         __builtin__.setattr(obj, name, val)
 
     @classmethod
@@ -144,11 +153,14 @@ class Dialect(_DialectBase):
             permissible.
         """
         if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
-            raise RuntimeError('TODO')
+            m = 'Cannot access attribute "{0}".'.format(name)
+            raise exceptions.LXPrivateAttrError(m)
         elif name in cls.forbidden_attrs_set:
-            raise RuntimeError('TODO')
+            m = 'Cannot access attribute "{0}".'.format(name)
+            raise exceptions.ForbiddenAttrError(m)
         elif name in cls.unassignable_attrs_set:
-            raise RuntimeError('TODO')
+            m = 'Cannot assign to attribute "{0}".'.format(name)
+            raise exceptions.UnassignableAttrError(m)
         __builtin__.delattr(obj, name)
 
 

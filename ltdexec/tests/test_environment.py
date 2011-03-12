@@ -21,7 +21,7 @@ class Environment_TestCase(LtdExec_TestCaseBase):
 
     def test_basic(self):
         self.assertEquals(0, len(wrapper._local.key_stack))
-        environment = Environment({}, {'x':5}, {})
+        environment = Environment({}, {'x':5})
         self.assertEquals(1, len(wrapper._local.key_stack))
         environment.close()
         self.assertTrue("Good. No exceptions thrown.")
@@ -34,7 +34,7 @@ class Environment_TestCase(LtdExec_TestCaseBase):
             'b': wrapper.defname(TestObj, method_on_close='close'),
             }
         self.assertEquals(0, len(wrapper._local.key_stack))
-        environment = Environment(objects, {}, {})
+        environment = Environment(objects, {})
         self.assertEquals(True, environment.globals['a'].initialized)
         self.assertEquals(False, environment.globals['a'].closed)
         self.assertEquals(True, environment.globals['b'].initialized)
@@ -59,7 +59,7 @@ class Environment_TestCase(LtdExec_TestCaseBase):
             }
         self.assertEquals(0, len(wrapper._local.key_stack))
         with self.assertRaises(RuntimeError) as cm:
-            environment = Environment(objects, {}, {})
+            environment = Environment(objects, {})
         self.assertEquals('ThrowingTestObj', cm.exception.args[0])
         self.assertEquals(True, TestObj.instances['a'].initialized)
         self.assertEquals(False, TestObj.instances['a'].closed)
@@ -82,7 +82,7 @@ class Environment_TestCase(LtdExec_TestCaseBase):
             }
         self.assertEquals(0, len(wrapper._local.key_stack))
         with self.assertRaises(RuntimeError) as cm:
-            environment = Environment(objects, {}, {})
+            environment = Environment(objects, {})
         self.assertEquals('ThrowingTestObj', cm.exception.args[0])
         self.assertEquals(0, len(wrapper._local.key_stack))
 
@@ -107,7 +107,7 @@ class Environment_TestCase(LtdExec_TestCaseBase):
             }
         self.assertEquals(0, len(wrapper._local.key_stack))
 
-        env = Environment(objects, {}, {})
+        env = Environment(objects, {})
         with self.assertRaises(RuntimeError) as cm:
             env.close()
 

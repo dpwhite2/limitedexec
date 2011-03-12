@@ -17,8 +17,10 @@ from .. import exceptions
 #==============================================================================#
 def syntax_error(node, msg, reason=None):
     lineno = getattr(node, 'lineno', -1)
-    offset = getattr(node, 'col_offset', -1)
-    filename = '<unknown>'
+    # Offset in AST objects is 0-based, while in SyntaxError exception 
+    # it is 1-based...
+    offset = getattr(node, 'col_offset', -1) + 1
+    filename = '<ltdexec_script>'
     text = '<unknown>'
     raise exceptions.SyntaxError(msg, filename, lineno, offset, text, reason)
 

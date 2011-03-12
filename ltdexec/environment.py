@@ -9,10 +9,9 @@ class Environment(object):
     """ A script is executed in an Environment.  This contains the globals and
         locals dicts that are available to the script when it begins execution.
     """
-    def __init__(self, objects, globals, locals):
+    def __init__(self, objects, globals):
         assert isinstance(objects, dict)
         assert isinstance(globals, dict)
-        assert isinstance(locals, dict)
 
         self.metadata = {}
         self.key = wrapper.create_envkey()
@@ -36,8 +35,11 @@ class Environment(object):
 
         _globals.update(globals)
 
+        # locals and globals must refer to the same dict.  Otherwise, 
+        # module-scope names are only placed in the locals dict.  In that case, 
+        # module-scope names could not be used from within local scopes.
         self.globals = _globals
-        self.locals = locals
+        self.locals = self.globals
         self.modules = {}
         # TODO: put custom import function into globals
 
@@ -97,11 +99,10 @@ class EnvironmentFactory(object):
             self.objects = {}
         self.objects.update(dialect.builtin_objects)
 
-    def __call__(self, globals=None, locals=None):
+    def __call__(self, globals=None):
         """ Create an Environment object. """
         globals = globals or {}
-        locals = locals or {}
-        return self.Environment(self.objects, globals, locals)
+        return self.Environment(self.objects, globals)
 
 
 #==============================================================================#
