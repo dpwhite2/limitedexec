@@ -6,6 +6,8 @@ import traceback
 import itertools
 import re
 
+from . import config
+
 #==============================================================================#
 class Exception(exceptions.Exception):
     pass
@@ -137,7 +139,7 @@ def fix_missing_traceback_filename(tb, source):
     if isinstance(tb, types.TracebackType):
         tb = traceback.extract_tb(tb)
     def _fix_entry(entry):
-        if entry[0] == '<ltdexec_script>':
+        if entry[0] == config.misc.DEFAULT_SCRIPT_FILE_NAME:
             entry = (source.filename,) + entry[1:]
         return entry
     return [_fix_entry(entry) for entry in tb]

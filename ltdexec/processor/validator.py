@@ -20,8 +20,8 @@ def syntax_error(node, msg, reason=None):
     # Offset in AST objects is 0-based, while in SyntaxError exception 
     # it is 1-based...
     offset = getattr(node, 'col_offset', -1) + 1
-    filename = '<ltdexec_script>'
-    text = '<unknown>'
+    filename = config.misc.DEFAULT_SCRIPT_FILE_NAME
+    text = config.misc.DEFAULT_SCRIPT_TEXT_LINE
     raise exceptions.SyntaxError(msg, filename, lineno, offset, text, reason)
 
 #==============================================================================#

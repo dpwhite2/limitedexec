@@ -2,7 +2,7 @@ import ast
 import sys
 import __builtin__
 
-from . import exceptions
+from . import exceptions, config
 from .source import Source
 from .script import Script
 
@@ -28,7 +28,7 @@ class BaseCompiler(object):
             code = self.do_compile(src, filename)
         except SyntaxError:
             typ, e, tb = sys.exc_info()
-            if e.filename == '<ltdexec_script>':
+            if e.filename == config.misc.DEFAULT_SCRIPT_FILE_NAME:
                 e.filename = filename
                 e.text = source[e.lineno] + '\n'
             raise exceptions.CompilationError((typ,e,tb), source, 
