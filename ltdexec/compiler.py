@@ -9,8 +9,8 @@ from .script import Script
 #==============================================================================#
 def compile(source, filename, dialect):
     """Compile a script using the given dialect.
-       
-       The `dialect` parameter may be a dialect class, a dialect class 
+
+       The `dialect` parameter may be a dialect class, a dialect class
        instance, or the name of a previously registered dialect.
        """
     from .dialect import util as dialect_util
@@ -37,16 +37,16 @@ class BaseCompiler(object):
             if e.filename == config.misc.DEFAULT_SCRIPT_FILE_NAME:
                 e.filename = filename
                 e.text = source[e.lineno] + '\n'
-            raise exceptions.CompilationError((typ,e,tb), source, 
+            raise exceptions.CompilationError((typ,e,tb), source,
                                               sanitize=False)
         except:
-            raise exceptions.CompilationError(sys.exc_info(), source, 
+            raise exceptions.CompilationError(sys.exc_info(), source,
                                               sanitize=False)
         return self.script_factory(source, code)
 
     def do_compile(self, src, filename):
-        """Compilation entry-point for derived classes.  The returned value is 
-           a code object.  Concrete compiler implementations should override 
+        """Compilation entry-point for derived classes.  The returned value is
+           a code object.  Concrete compiler implementations should override
            this method """
         raise NotImplementedError()
 
@@ -110,4 +110,3 @@ class SplitSourceCompiler(BaseCompiler):
         return self.processor.process_ast(tree)
 
 #==============================================================================#
-

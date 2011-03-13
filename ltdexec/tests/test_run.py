@@ -14,7 +14,7 @@ class Run_TestCase(LtdExec_TestCaseBase):
     def test_imported_module(self):
         class MyDialect(Dialect):
             allow_statement_import = True
-            
+
         filename = '<my_file>'
         src = """\
         import math
@@ -25,7 +25,6 @@ class Run_TestCase(LtdExec_TestCaseBase):
         globals = result.globals
         self.assertFalse(isinstance(result.globals['math'], types.ModuleType))
         self.assertTrue(isinstance(result.globals['math'], ModuleWrapper))
-        
 
 
 

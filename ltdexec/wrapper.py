@@ -51,33 +51,33 @@ class deffunc(defname):
 
 #==============================================================================#
 class definstance(defname):
-    def __init__(self, callable, args=None, kwargs=None, readable_attrs=None, 
-                 writable_attrs=None, unreadable_attrs=None, 
+    def __init__(self, callable, args=None, kwargs=None, readable_attrs=None,
+                 writable_attrs=None, unreadable_attrs=None,
                  unwritable_attrs=None, method_on_close=None):
-        super(definstance, self).__init__(self, callable, args, kwargs, 
+        super(definstance, self).__init__(self, callable, args, kwargs,
                                           method_on_close)
         # create instance of callable with protected attrs
         # callable must be a class.
         assert isinstance(callable, type)
         # create subclass of WrapperBase, InstanceWrapper.
-        @wrap_class(readable_attrs=readable_attrs, 
-                       writable_attrs=writable_attrs, 
-                       unreadable_attrs=unreadable_attrs, 
+        @wrap_class(readable_attrs=readable_attrs,
+                       writable_attrs=writable_attrs,
+                       unreadable_attrs=unreadable_attrs,
                        unwritable_attrs=unwritable_attrs)
         class InstanceWrapper(WrapperBase):
             pass
         self.InstanceWrapper = InstanceWrapper
-        
+
     def construct(self):
-        # when construct is called, create the instance of callable... 
+        # when construct is called, create the instance of callable...
         obj = super(definstance, self).construct()
         # then wrap it in an instance of InstanceWrapper.
         return self.InstanceWrapper(obj)
-        
-    
+
+
 #==============================================================================#
 
-def wrap_class(readable_attrs=None, writable_attrs=None, 
+def wrap_class(readable_attrs=None, writable_attrs=None,
                    unreadable_attrs=None, unwritable_attrs=None):
     def _inner(cls):
         assert isinstance(cls, WrapperBase)
@@ -89,7 +89,7 @@ def wrap_class(readable_attrs=None, writable_attrs=None,
             cls._LX_unreadable_attrs = frozenset(unreadable_attrs)
         if unwritable_attrs is not None:
             cls._LX_unwritable_attrs = frozenset(unwritable_attrs)
-            
+
         cls._LX_readable_attrs = cls._LX_readable_attrs | cls._LX_writable_attrs
         cls._LX_unwritable_attrs = cls._LX_unreadable_attrs | cls._LX_unwritable_attrs
         return cls
@@ -102,10 +102,10 @@ class WrapperBase(object):
     _LX_writable_attrs = set()
     _LX_unreadable_attrs = set()
     _LX_unwritable_attrs = set()
-    
+
     def __init__(self, obj):
         self._LX_obj = obj
-        
+
     def __getattribute__(self, name):
         super_getattr = super(WrapperBase, self).__getattribute__
         if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
@@ -126,7 +126,7 @@ class WrapperBase(object):
             else:
                 obj = super_getattr('_LX_obj')
                 return getattr(obj, name)
-    
+
     def __setattr__(self, name, value):
         if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             return super(WrapperBase, self).__setattr__(name, value)
@@ -152,16 +152,16 @@ class WrapperBase(object):
 class ModuleWrapper(object):
     """Wraps a module with the goal of allowing selective access to it."""
     def __init__(self, modname, module_settings=None):
-        # options:  allow all names, forbid names not in __all__, 
-        #   forbid names beginning with underscore, allow listed names, 
+        # options:  allow all names, forbid names not in __all__,
+        #   forbid names beginning with underscore, allow listed names,
         #   forbid listed names, forbid indirect modules
         module_settings = module_settings or {}
         readable_names = module_settings.get('readable_names', set())
         unreadable_names = module_settings.get('unreadable_names', set())
-        
+
         forbid_underscore_names = module_settings.get('forbid_underscore_names', True)
         allow_names_in_all = module_settings.get('allow_names_in_all', True)
-        
+
         self._LX_modname = modname
         __import__(modname, globals(), locals(), [], 0)
         mod = sys.modules[modname]
@@ -186,30 +186,30 @@ class ModuleWrapper(object):
                 else:
                     members[k] = v
         self._LX_members = members
-        
+
     def _LX_names(self):
         return self._LX_members.keys()
-        
+
     def _LX_add_submodule(self, modname, module):
         assert modname.startswith(self._LX_modname)
         assert modname == (self._LX_modname + '.' + modname.rpartition('.')[2])
         name = modname.rpartition('.')[2]
         self._LX_members[name] = module
-        
+
     def __getattribute__(self, name):
         super_getattr = super(ModuleWrapper, self).__getattribute__
         if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             return super_getattr(name)
         else:
             return super_getattr('_LX_members')[name]
-        
+
     def __setattr__(self, name, value):
         if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             super(ModuleWrapper, self).__setattr__(name, value)
         else:
             raise RuntimeError('TODO')
-            
-        
+
+
 
 
 #==============================================================================#

@@ -18,7 +18,7 @@ class WrapperBase_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(5, wrapper.xyz)
         self.assertEquals(obj, wrapper._LX_obj)
         self.assertEquals(5, obj.xyz)
-        
+
     def test_readable_attrs(self):
         class MyWrapper(WrapperBase):
             _LX_readable_attrs = set(('xyz',))
@@ -37,7 +37,7 @@ class WrapperBase_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(obj, wrapper._LX_obj)
         self.assertEquals(321, obj.abc)
         self.assertEquals(5, obj.xyz)
-        
+
     def test_writable_attrs(self):
         class MyWrapper(WrapperBase):
             _LX_writable_attrs = set(('a',))
@@ -54,7 +54,7 @@ class WrapperBase_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(obj, wrapper._LX_obj)
         self.assertEquals(5, obj.a)
         self.assertEquals(789, obj.b)
-        
+
     def test_unreadable_attrs(self):
         class MyWrapper(WrapperBase):
             _LX_unreadable_attrs = set(('abc',))
@@ -73,7 +73,7 @@ class WrapperBase_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(obj, wrapper._LX_obj)
         self.assertEquals(321, obj.abc)
         self.assertEquals(5, obj.xyz)
-        
+
     def test_unwritable_attrs(self):
         class MyWrapper(WrapperBase):
             _LX_unwritable_attrs = set(('b',))
@@ -92,7 +92,7 @@ class WrapperBase_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(obj, wrapper._LX_obj)
         self.assertEquals(5, obj.a)
         self.assertEquals(789, obj.b)
-        
+
 #==============================================================================#
 class ModuleWrapper_TestCase(LtdExec_TestCaseBase):
     def test_basic(self):
@@ -102,7 +102,7 @@ class ModuleWrapper_TestCase(LtdExec_TestCaseBase):
         self.assertTrue('_current_frames' in sys.__dict__)
         # by default, names with a leading underscore are not available
         self.assertTrue('_current_frames' not in mod._LX_names())
-        
+
     def test_readable(self):
         import math
         settings = {'readable_names': set(('sin','cos',))}
@@ -114,7 +114,7 @@ class ModuleWrapper_TestCase(LtdExec_TestCaseBase):
         self.assertTrue('tan' not in mod._LX_names())
         self.assertTrue('atan' not in mod._LX_names())
         self.assertEquals(2, len(mod._LX_names()))
-        
+
     def test_unreadable(self):
         import math
         settings = {'unreadable_names': set(('tan','atan',))}
@@ -126,7 +126,7 @@ class ModuleWrapper_TestCase(LtdExec_TestCaseBase):
         self.assertTrue('atan' in math.__dict__)
         self.assertTrue('tan' not in mod._LX_names())
         self.assertTrue('atan' not in mod._LX_names())
-        
+
     def test_module_with_all(self):
         import csv
         #settings = {'readable_names': set(('sin','cos',))}
@@ -139,7 +139,7 @@ class ModuleWrapper_TestCase(LtdExec_TestCaseBase):
         self.assertTrue('_Dialect' not in mod._LX_names())
         self.assertTrue('reduce' in csv.__dict__)
         self.assertTrue('reduce' not in mod._LX_names())
-        
+
     def test_module_with_submodules(self):
         import os
         import os.path

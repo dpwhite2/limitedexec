@@ -123,7 +123,7 @@ class Environment_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(True,  env.globals['b'].closed)
         self.assertEquals(True,  env.globals['d'].initialized)
         self.assertEquals(False, env.globals['d'].closed)
-        
+
     def test_import(self):
         src = """\
         _LX_import_module('math')
@@ -135,7 +135,7 @@ class Environment_TestCase(LtdExec_TestCaseBase):
             r = eval(co, env.globals, env.locals)
             self.assertTrue('Good. No exception.')
             self.assertEquals(4.0, env.globals['x'])
-        
+
     def test_import_from(self):
         src = """\
         _LX_import_module('math', froms=[('sqrt',None)])

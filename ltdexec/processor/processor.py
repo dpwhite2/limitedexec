@@ -68,4 +68,3 @@ class SplitSourceProcessor(Processor):
         return ast_tree
 
 
-

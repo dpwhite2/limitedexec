@@ -118,7 +118,7 @@ class Builder(object):
             self.check_builtin_flag(traits.name, traits.builtin_name)
 
         self.attrs['forbidden_names_set'] = set(self.attrs['forbidden_names'])
-        # Make sure certain important names (True, False, None) haven't been 
+        # Make sure certain important names (True, False, None) haven't been
         # forbidden.
         ALWAYS_ALLOWED = config.names.ALWAYS_ALLOWED_NAMES
         conflict = self.attrs['forbidden_names_set'] & set(ALWAYS_ALLOWED)
@@ -127,7 +127,7 @@ class Builder(object):
             m = 'TODO. The following names must be permitted: {0}'
             m.format(names)
             raise exceptions.DialectSetupError(m)
-        
+
         ALWAYS_FORBIDDEN_NAMES = config.names.ALWAYS_FORBIDDEN_NAMES
         self.attrs['forbidden_names_set'].update(ALWAYS_FORBIDDEN_NAMES)
 

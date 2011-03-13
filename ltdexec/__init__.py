@@ -5,4 +5,3 @@
 __version__ = '0.0.0'
 __author__ =  'David White'
 __docformat__ = 'restructuredtext'
-

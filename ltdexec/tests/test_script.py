@@ -60,13 +60,13 @@ class Script_TestCase(LtdExec_TestCaseBase):
         exc_type, exc_value, exc_tb = result.exc_info
         self.assertEquals(RuntimeError, exc_type)
         self.assertEquals("I raised it!", exc_value.args[0])
-        
+
     def test_raising_on_environment_construction(self):
         # In experiments, the order of items in the dict was 'a', 'c', 'b', 'd'.
         # The expected output of this test will change if this does not hold.
         self.assertEquals(['a','c','b','d'], {'a':0,'b':0,'c':0,'d':0}.keys())
         TestObj.clear_instances()
-        
+
         class MyDialect(Dialect):
             objects = {
                 'a': wrapper.defname(TestObj, args=['a']),
@@ -74,18 +74,18 @@ class Script_TestCase(LtdExec_TestCaseBase):
                 'b': wrapper.defname(ThrowingTestObj, args=['b'], method_on_close='close'),
                 'd': wrapper.defname(TestObj, args=['d']),
             }
-            
+
         text = 'x = 5'
         filename = '<script>'
         mode = 'exec'
         co = compile(text, filename=filename, mode=mode)
         src = source.Source(text, filename)
         my_script = script.Script(co, src, MyDialect)
-        
+
         with self.assertRaises(RuntimeError) as cm:
             result = my_script.run()
         self.assertEquals('ThrowingTestObj', cm.exception.args[0])
-        
+
         self.assertEquals(True, TestObj.instances['a'].initialized)
         self.assertEquals(False, TestObj.instances['a'].closed)
         self.assertEquals(True, TestObj.instances['c'].initialized)
@@ -93,6 +93,6 @@ class Script_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(False, TestObj.instances['b'].initialized)
         self.assertEquals(False, TestObj.instances['b'].closed)
         self.assertTrue('d' not in TestObj.instances)
-        
+
 
 #==============================================================================#

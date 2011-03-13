@@ -25,31 +25,31 @@ class Script(object):
         self.source = source
         self.dialect = dialect_util.get_dialect_object(dialect)
         self.env_factory = self.dialect.EnvironmentFactory(self.dialect)
-        
+
     @property
     def filename(self):
         return self.source.filename
 
     def run(self, globals=None):
-        """ Run the script.  If *globals* is provided, they will 
-            be merged into the environment's namespace overwriting any object 
-            with the same name.  The return value is a Result object containing 
+        """ Run the script.  If *globals* is provided, they will
+            be merged into the environment's namespace overwriting any object
+            with the same name.  The return value is a Result object containing
             information about the script's run.
-            
-            Before execution, an Environment will be created using the dialect 
-            given in the constructor.  It is seperate from any other 
+
+            Before execution, an Environment will be created using the dialect
+            given in the constructor.  It is seperate from any other
             Environment created by a previous or future run.
-            
-            If an execption occurs while creating the Environment, it will 
-            propogate normally from this method.  However, if an exception 
-            occurs during script execution, it will be caught and saved in the 
+
+            If an execption occurs while creating the Environment, it will
+            propogate normally from this method.  However, if an exception
+            occurs during script execution, it will be caught and saved in the
             Result object.
         """
         globals = globals or {}
 
-        # Exceptions due to initializing the Environment will propogate.  This 
-        # is expected because such exceptions are *not* due to the script 
-        # itself.  The source is instead the result of the `objects` attribute 
+        # Exceptions due to initializing the Environment will propogate.  This
+        # is expected because such exceptions are *not* due to the script
+        # itself.  The source is instead the result of the `objects` attribute
         # of the Dialect.
         with self.env_factory(globals) as env:
             res = Result()

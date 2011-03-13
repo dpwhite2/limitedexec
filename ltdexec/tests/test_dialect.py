@@ -219,14 +219,14 @@ class CustomDialect_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(False, MyDialect.allow_statement_return)
         self.assertEquals(True, MyDialect.allow_expression_yield)
         self.assertEquals(True, MyDialect.allow_expression_lambda)
-        
+
     def test_immutable(self):
         class MyDialect(Dialect):
             pass
-            
+
         with self.assertRaises(exceptions.ImmutableError) as cm:
             MyDialect.allow_statement_def = True
-        
+
         mydialect = MyDialect()
         with self.assertRaises(exceptions.ImmutableError) as cm:
             mydialect.allow_statement_def = True
@@ -237,12 +237,12 @@ class DialectUtil_TestCase(LtdExec_TestCaseBase):
         from ltdexec.dialect import util
         obj = util.get_dialect_object(Dialect)
         self.assertEquals(Dialect(), obj)
-        
+
     def test_get_dialect_object_by_obj(self):
         from ltdexec.dialect import util
         obj = util.get_dialect_object(Dialect())
         self.assertEquals(Dialect(), obj)
-        
+
     def test_get_dialect_object_by_name(self):
         from ltdexec.dialect import util
         obj = util.get_dialect_object('ltdexec.dialect.base.Dialect')

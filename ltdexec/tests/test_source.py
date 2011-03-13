@@ -55,4 +55,3 @@ class Source_TestCase(LtdExec_TestCaseBase):
             source[:0]
         self.assertEquals('x = 5\ny = 7', str(source))
         self.assertEquals('x = 5$y = 7', '$'.join(line for line in source))
-        

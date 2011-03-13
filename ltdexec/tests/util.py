@@ -32,4 +32,3 @@ class ThrowsOnClose(TestObj):
         raise RuntimeError('ThrowsOnClose')
 
 #==============================================================================#
-

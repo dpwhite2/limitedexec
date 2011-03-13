@@ -34,8 +34,8 @@ class MergedAstTransform(TransformBase):
 
 #==============================================================================#
 class TransformImportsAst(ast.NodeTransformer):
-    """Transform an AST containing Import or ImportFrom nodes to use the 
-       LimitedExec custom import function(s) instead.  The import functions are 
+    """Transform an AST containing Import or ImportFrom nodes to use the
+       LimitedExec custom import function(s) instead.  The import functions are
        provided by the Environment class.
     """
     def visit_Import(self, node):
@@ -55,7 +55,7 @@ class TransformImportsAst(ast.NodeTransformer):
             ast.fix_missing_locations(expr)
             exprs.append(expr)
         return exprs
-    
+
     def visit_ImportFrom(self, node):
         assert node.level == 0
         none = ast.Name(id='None', ctx=ast.Load())
@@ -75,10 +75,9 @@ class TransformImportsAst(ast.NodeTransformer):
         expr = ast.copy_location(expr, node)
         ast.fix_missing_locations(expr)
         return [expr]
-        
+
 
 #==============================================================================#
-
 
 
 

@@ -7,8 +7,12 @@ fileexts = frozenset(('.py',))
 def strip_trailing_ws(ifilename, ofilename=None):
     ofilename = ofilename or ifilename
     f = open(ifilename, 'r')
-    lines = [line.rstrip() for line in f]
+    origlines = [line for line in f]
     f.close()
+    lines = [line.rstrip() for line in origlines]
+    if lines == origlines:
+        print 'No changes to file: {0}'.format(ifilename)
+        return
     
     f = open(ofilename, 'w')
     f.write('\n'.join(lines))

@@ -16,11 +16,11 @@ from .. import exceptions
 
 #==============================================================================#
 def syntax_error(node, msg, reason=None):
-    """Raise a SyntaxError from the given node.  This is intended for use 
+    """Raise a SyntaxError from the given node.  This is intended for use
        within abstract syntax tree validators.
     """
     lineno = getattr(node, 'lineno', -1)
-    # Offset in AST objects is 0-based, while in SyntaxError exception 
+    # Offset in AST objects is 0-based, while in SyntaxError exception
     # it is 1-based...
     offset = getattr(node, 'col_offset', -1) + 1
     filename = config.misc.DEFAULT_SCRIPT_FILE_NAME
@@ -190,8 +190,8 @@ class AstValidator(MinimalAstValidator):
            node.value.id in config.names.BUILTIN_NAMES_SET:
             m = 'Attributes of builtins may not be accessed.'
             syntax_error(node, m)
-            
-    # TODO: check name of function definitions, class defintions, method 
+
+    # TODO: check name of function definitions, class defintions, method
     #       definitions, etc.
 
 

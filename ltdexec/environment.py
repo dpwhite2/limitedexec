@@ -33,17 +33,17 @@ class Environment(object):
 
         _globals.update(globals)
 
-        # locals and globals must refer to the same dict.  Otherwise, 
-        # module-scope names are only placed in the locals dict.  In that case, 
+        # locals and globals must refer to the same dict.  Otherwise,
+        # module-scope names are only placed in the locals dict.  In that case,
         # module-scope names could not be used from within local scopes.
         self.globals = _globals
         self.locals = self.globals
-        
+
         self.modules = {}
         self.module_settings = {}
-        
+
         self.globals['_LX_import_module'] = self.import_module
-                
+
     def _close_startup_object(self, obj, info):
         try:
             obj._LX_unlock(self.key)
@@ -51,7 +51,7 @@ class Environment(object):
             pass
         finally:
             getattr(obj, info['method_on_close'], lambda: None)()
-                
+
     def _close_startup_objects(self):
         exc = None
         for obj, info in self.startup_objects:
@@ -82,10 +82,10 @@ class Environment(object):
         return self
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
-        
+
     def import_module(self, modname, asname=None, froms=None):
-        """Load the given module and any parent modules.  The top-most module 
-           is placed in the Environment's globals dict.  The child module(s) 
+        """Load the given module and any parent modules.  The top-most module
+           is placed in the Environment's globals dict.  The child module(s)
            can be accessed through their parents' attributes.
         """
         self.load_module(modname)
@@ -103,8 +103,8 @@ class Environment(object):
             self.globals[toplevel] = mod
 
     def load_module(self, modname):
-        """Load the given module, and parent modules.  All are placed in the 
-           Environment's modules dict.  (To be accessible to scripts, the 
+        """Load the given module, and parent modules.  All are placed in the
+           Environment's modules dict.  (To be accessible to scripts, the
            module must be imported.)"""
         try:
             return self.modules[modname]
@@ -141,6 +141,5 @@ class EnvironmentFactory(object):
 
 
 #==============================================================================#
-
 
 

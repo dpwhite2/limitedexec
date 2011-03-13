@@ -46,4 +46,3 @@ class Source(object):
         return '<Source: filename={0}, lines={1}>'.format(self.filename, len(self.lines))
 
 #==============================================================================#
-
