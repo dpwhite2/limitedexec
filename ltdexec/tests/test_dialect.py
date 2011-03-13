@@ -47,7 +47,9 @@ class Dialect_TestCase(LtdExec_TestCaseBase):
                                'getattr hasattr vars raw_input input dir file '
                                'help').split()),
                           Dialect.forbidden_names_set)
-        self.assertEquals(set('__class__ __dict__ __bases__ __mro__ __module__ __file__'.split()),
+        self.assertEquals(set(('__class__ __dict__ __bases__ __mro__ __module__ __file__ '
+                               '__delitem__ __setattr__ __delslice__ __del__ __set__ __get__ '
+                               '__getattribute__ __getattr__ __delattr__ __delete__').split()),
                           Dialect.forbidden_attrs_set)
         self.assertEquals(set(), Dialect.unassignable_names_set)
         self.assertEquals(set(), Dialect.unassignable_attrs_set)
@@ -163,7 +165,9 @@ class EmptyCustomDialect_TestCase(LtdExec_TestCaseBase):
                                'getattr hasattr vars raw_input input dir file '
                                'help').split()),
                           self.MyDialect.forbidden_names_set)
-        self.assertEquals(set('__class__ __dict__ __bases__ __mro__ __module__ __file__'.split()),
+        self.assertEquals(set(('__class__ __dict__ __bases__ __mro__ __module__ __file__ '
+                               '__delitem__ __setattr__ __delslice__ __del__ __set__ __get__ '
+                               '__getattribute__ __getattr__ __delattr__ __delete__').split()),
                           self.MyDialect.forbidden_attrs_set)
         self.assertEquals(set(), self.MyDialect.unassignable_names_set)
         self.assertEquals(set(), self.MyDialect.unassignable_attrs_set)

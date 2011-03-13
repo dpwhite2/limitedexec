@@ -146,6 +146,11 @@ def fix_missing_traceback_filename(tb, source):
     
 
 class WrappedException(Exception):
+    """Wrap an exception which would propagate out of the library.  The 
+       original exception can be specially formatted to hide library 
+       implementation details from the user, while still enabling the exception 
+       location to be disclosed.
+    """
     def __init__(self, exc_info, source, sanitize=True):
         self.exc_info = exc_info
         self.sanitize = sanitize
@@ -181,14 +186,20 @@ class WrappedException(Exception):
                 self.format_exception_only())
                 
     def __str__(self):
+        """Provide a traceback of the original exception, with script code 
+           locations included.
+        """
         return ''.join(self.format_exception())
         
 
 class CompilationError(WrappedException):
+    """Subclass of WrappedException which is raised during script 
+       compilation."""
     def __init__(self, exc_info, source, sanitize=True):
         super(CompilationError, self).__init__(exc_info, source, sanitize)
 
 class ExecutionError(WrappedException):
+    """Subclass of WrappedException which is raised during script execution."""
     def __init__(self, exc_info, source, sanitize=True, 
                  globals=None, locals=None):
         super(ExecutionError, self).__init__(exc_info, source, sanitize)

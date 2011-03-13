@@ -8,12 +8,18 @@ from .script import Script
 
 #==============================================================================#
 def compile(source, filename, dialect):
+    """Compile a script using the given dialect.
+       
+       The `dialect` parameter may be a dialect class, a dialect class 
+       instance, or the name of a previously registered dialect.
+       """
     from .dialect import util as dialect_util
     dialect = dialect_util.get_dialect_object(dialect)
     return dialect.compile(source, filename)
 
 #==============================================================================#
 class BaseCompiler(object):
+    """Base class for all compiler objects."""
 
     def __init__(self, dialect):
         from .dialect import util as dialect_util
@@ -21,6 +27,7 @@ class BaseCompiler(object):
         self.processor = dialect.Processor(dialect)
 
     def __call__(self, src, filename):
+        """Compile the given source using this compiler's dialect."""
         assert isinstance(src, basestring)
         source = Source(src, filename)
         try:
@@ -38,13 +45,18 @@ class BaseCompiler(object):
         return self.script_factory(source, code)
 
     def do_compile(self, src, filename):
+        """Compilation entry-point for derived classes.  The returned value is 
+           a code object.  Concrete compiler implementations should override 
+           this method """
         raise NotImplementedError()
 
     def compile_to_ast(self, src, filename, mode='exec'):
+        """Compile a string to an abstract syntax tree."""
         return __builtin__.compile(src, filename, mode,
                                    flags=ast.PyCF_ONLY_AST)
 
     def compile_to_code(self, ast_tree, filename):
+        """Compile an abstract syntax tree to a Python bytecode object."""
         if isinstance(ast_tree, ast.Module):
             mode = 'exec'
         elif isinstance(ast_tree, ast.Expression):

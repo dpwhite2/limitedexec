@@ -19,6 +19,8 @@ ALWAYS_FORBIDDEN_ATTRS = []
 ALWAYS_UNASSIGNABLE_NAMES = []
 ALWAYS_UNASSIGNABLE_ATTRS = []
 
+ALWAYS_ALLOWED_NAMES = _liststr('True False None')
+
 LTDEXEC_PRIVATE_PREFIX = '_LX_'
 
 BUILTIN_NAMES_SET = frozenset(x for x in __builtin__.__dict__.iterkeys())

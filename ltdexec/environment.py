@@ -13,7 +13,6 @@ class Environment(object):
         assert isinstance(objects, dict)
         assert isinstance(globals, dict)
 
-        ##self.metadata = {}
         self.startup_objects = []
         self.key = wrapper.create_envkey()
         _globals = {}
@@ -39,6 +38,7 @@ class Environment(object):
         # module-scope names could not be used from within local scopes.
         self.globals = _globals
         self.locals = self.globals
+        
         self.modules = {}
         self.module_settings = {}
         
@@ -84,6 +84,10 @@ class Environment(object):
         self.close()
         
     def import_module(self, modname, asname=None, froms=None):
+        """Load the given module and any parent modules.  The top-most module 
+           is placed in the Environment's globals dict.  The child module(s) 
+           can be accessed through their parents' attributes.
+        """
         self.load_module(modname)
         if froms:
             mod = self.modules[modname]
@@ -99,6 +103,9 @@ class Environment(object):
             self.globals[toplevel] = mod
 
     def load_module(self, modname):
+        """Load the given module, and parent modules.  All are placed in the 
+           Environment's modules dict.  (To be accessible to scripts, the 
+           module must be imported.)"""
         try:
             return self.modules[modname]
         except KeyError:

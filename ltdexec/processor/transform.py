@@ -34,6 +34,10 @@ class MergedAstTransform(TransformBase):
 
 #==============================================================================#
 class TransformImportsAst(ast.NodeTransformer):
+    """Transform an AST containing Import or ImportFrom nodes to use the 
+       LimitedExec custom import function(s) instead.  The import functions are 
+       provided by the Environment class.
+    """
     def visit_Import(self, node):
         exprs = []
         for alias in node.names:
@@ -73,6 +77,7 @@ class TransformImportsAst(ast.NodeTransformer):
         return [expr]
         
 
+#==============================================================================#
 
 
 

@@ -171,6 +171,23 @@ attribute_leafflag_traits = [
     T('allow_attribute_mro', False, '__mro__'),
     T('allow_attribute_module', False, '__module__'),
     T('allow_attribute_file', False, '__file__'),
+    # The following are actually methods.
+    T('allow_attribute_new', True, '__new__'),
+    T('allow_attribute_init', True, '__init__'),
+    T('allow_attribute_del', False, '__del__'),
+    T('allow_attribute_getattr', False, '__getattr__'),
+    T('allow_attribute_setattr', False, '__setattr__'),
+    T('allow_attribute_delattr', False, '__delattr__'),
+    T('allow_attribute_getattribute', False, '__getattribute__'),
+    T('allow_attribute_get', False, '__get__'),
+    T('allow_attribute_set', False, '__set__'),
+    T('allow_attribute_delete', False, '__delete__'),
+    T('allow_attribute_getitem', True, '__getitem__'),
+    T('allow_attribute_setitem', True, '__setitem__'),
+    T('allow_attribute_delitem', False, '__delitem__'),
+    T('allow_attribute_getslice', True, '__getslice__'),
+    T('allow_attribute_setslice', True, '__setslice__'),
+    T('allow_attribute_delslice', False, '__delslice__'),
 ]
 attribute_leafflag_traits = dict((t.name, t) for t in attribute_leafflag_traits)
 

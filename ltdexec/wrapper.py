@@ -150,6 +150,7 @@ class WrapperBase(object):
 
 
 class ModuleWrapper(object):
+    """Wraps a module with the goal of allowing selective access to it."""
     def __init__(self, modname, module_settings=None):
         # options:  allow all names, forbid names not in __all__, 
         #   forbid names beginning with underscore, allow listed names, 
