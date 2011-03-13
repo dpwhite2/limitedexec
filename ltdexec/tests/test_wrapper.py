@@ -1,6 +1,6 @@
 import unittest
 
-from ltdexec.wrapper import WrapperBase, wrap_class
+from ltdexec.wrapper import WrapperBase, wrap_class, ModuleWrapper
 
 from .base import LtdExec_TestCaseBase
 
@@ -92,5 +92,63 @@ class WrapperBase_TestCase(LtdExec_TestCaseBase):
         self.assertEquals(obj, wrapper._LX_obj)
         self.assertEquals(5, obj.a)
         self.assertEquals(789, obj.b)
+        
+#==============================================================================#
+class ModuleWrapper_TestCase(LtdExec_TestCaseBase):
+    def test_basic(self):
+        import sys
+        mod = ModuleWrapper('sys')
+        self.assertEquals(sys.version_info, mod.version_info)
+        self.assertTrue('_current_frames' in sys.__dict__)
+        # by default, names with a leading underscore are not available
+        self.assertTrue('_current_frames' not in mod._LX_names())
+        
+    def test_readable(self):
+        import math
+        settings = {'readable_names': set(('sin','cos',))}
+        mod = ModuleWrapper('math', settings)
+        self.assertEquals(math.sin, mod.sin)
+        self.assertEquals(math.cos, mod.cos)
+        self.assertTrue('tan' in math.__dict__)
+        self.assertTrue('atan' in math.__dict__)
+        self.assertTrue('tan' not in mod._LX_names())
+        self.assertTrue('atan' not in mod._LX_names())
+        self.assertEquals(2, len(mod._LX_names()))
+        
+    def test_unreadable(self):
+        import math
+        settings = {'unreadable_names': set(('tan','atan',))}
+        mod = ModuleWrapper('math', settings)
+        self.assertEquals(math.sin, mod.sin)
+        self.assertEquals(math.cos, mod.cos)
+        self.assertEquals(math.fabs, mod.fabs)
+        self.assertTrue('tan' in math.__dict__)
+        self.assertTrue('atan' in math.__dict__)
+        self.assertTrue('tan' not in mod._LX_names())
+        self.assertTrue('atan' not in mod._LX_names())
+        
+    def test_module_with_all(self):
+        import csv
+        #settings = {'readable_names': set(('sin','cos',))}
+        mod = ModuleWrapper('csv')
+        self.assertEquals(csv.writer, mod.writer)
+        self.assertEquals(csv.reader, mod.reader)
+        self.assertTrue('re' in csv.__dict__)
+        self.assertTrue('re' not in mod._LX_names())
+        self.assertTrue('_Dialect' in csv.__dict__)
+        self.assertTrue('_Dialect' not in mod._LX_names())
+        self.assertTrue('reduce' in csv.__dict__)
+        self.assertTrue('reduce' not in mod._LX_names())
+        
+    def test_module_with_submodules(self):
+        import os
+        import os.path
+        osmod = ModuleWrapper('os')
+        self.assertTrue('path' in os.__dict__)
+        self.assertTrue('path' not in osmod._LX_names())
+        pathmod = ModuleWrapper('os.path')
+        osmod._LX_add_submodule('os.path', pathmod)
+        self.assertTrue('path' in osmod._LX_names())
+        self.assertEquals(pathmod, osmod.path)
 
 #==============================================================================#

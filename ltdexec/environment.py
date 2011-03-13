@@ -40,6 +40,7 @@ class Environment(object):
         self.globals = _globals
         self.locals = self.globals
         self.modules = {}
+        self.module_settings = {}
         
         self.globals['_LX_import_module'] = self.import_module
                 
@@ -100,9 +101,9 @@ class Environment(object):
     def load_module(self, modname):
         try:
             return self.modules[modname]
-        except IndexError:
+        except KeyError:
             pass
-        mod = ModuleWrapper(modname, self.module_settings[modname])
+        mod = wrapper.ModuleWrapper(modname, self.module_settings.get(modname,{}))
         parentname = modname.rpartition('.')[0]
         if parentname:
             parent = self.load_module(parentname)

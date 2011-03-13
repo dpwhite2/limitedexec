@@ -27,7 +27,7 @@ class SourceTransform(TransformBase):
 class AstTransform(TransformBase):
     # TODO: replace imports with custom import function
     def postcheck_transform(self, tree):
-        return tree
+        return TransformImportsAst().visit(tree)
 
 class MergedAstTransform(TransformBase):
     pass

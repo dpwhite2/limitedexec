@@ -4,6 +4,8 @@ import types
 import functools
 import sys
 
+from . import config
+
 #==============================================================================#
 _local = threading.local()
 _local.key_stack = []
@@ -106,7 +108,7 @@ class WrapperBase(object):
         
     def __getattribute__(self, name):
         super_getattr = super(WrapperBase, self).__getattribute__
-        if name.startswith('_LX_'):
+        if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             return super_getattr(name)
         else:
             if super_getattr('_LX_readable_attrs'):
@@ -126,7 +128,7 @@ class WrapperBase(object):
                 return getattr(obj, name)
     
     def __setattr__(self, name, value):
-        if name.startswith('_LX_'):
+        if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             return super(WrapperBase, self).__setattr__(name, value)
         else:
             super_getattr = super(WrapperBase, self).__getattribute__
@@ -148,22 +150,25 @@ class WrapperBase(object):
 
 
 class ModuleWrapper(object):
-    def __init__(self, modname, readable_names=None, unreadable_names=None):
+    def __init__(self, modname, module_settings=None):
         # options:  allow all names, forbid names not in __all__, 
         #   forbid names beginning with underscore, allow listed names, 
         #   forbid listed names, forbid indirect modules
-        readable_names = readable_names or set()
-        unreadable_names = unreadable_names or set()
+        module_settings = module_settings or {}
+        readable_names = module_settings.get('readable_names', set())
+        unreadable_names = module_settings.get('unreadable_names', set())
         
-        forbid_underscore_names = True
-        allow_names_in_all = True
+        forbid_underscore_names = module_settings.get('forbid_underscore_names', True)
+        allow_names_in_all = module_settings.get('allow_names_in_all', True)
         
         self._LX_modname = modname
         __import__(modname, globals(), locals(), [], 0)
         mod = sys.modules[modname]
         members = {}
         for k,v in mod.__dict__.iteritems():
-            if readable_names:
+            if k == '__all__':
+                continue
+            elif readable_names:
                 if k in readable_names and not isinstance(v, types.ModuleType):
                     members[k] = v
             else:
@@ -173,29 +178,32 @@ class ModuleWrapper(object):
                     pass
                 elif forbid_underscore_names and k.startswith('_'):
                     pass
-                elif allow_names_in_all and \
-                  ((mod.__all__ and k not in mod.__all__) or
-                   (not mod.__all__ and k.startswith('_'))):
+                elif (allow_names_in_all and
+                  (('__all__' in mod.__dict__ and k not in mod.__all__) or
+                   ('__all__' not in mod.__dict__ and k.startswith('_')))):
                     pass
                 else:
                     members[k] = v
         self._LX_members = members
         
+    def _LX_names(self):
+        return self._LX_members.keys()
+        
     def _LX_add_submodule(self, modname, module):
         assert modname.startswith(self._LX_modname)
         assert modname == (self._LX_modname + '.' + modname.rpartition('.')[2])
-        name = modname.rpartition('.')
+        name = modname.rpartition('.')[2]
         self._LX_members[name] = module
         
     def __getattribute__(self, name):
         super_getattr = super(ModuleWrapper, self).__getattribute__
-        if name.startswith('_LX_'):
+        if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             return super_getattr(name)
         else:
-            return getattr(super_getattr('_LX_members'), name)
+            return super_getattr('_LX_members')[name]
         
     def __setattr__(self, name, value):
-        if name.startswith('_LX_'):
+        if name.startswith(config.names.LTDEXEC_PRIVATE_PREFIX):
             super(ModuleWrapper, self).__setattr__(name, value)
         else:
             raise RuntimeError('TODO')
