@@ -10,8 +10,7 @@ from .script import Script
 def compile(source, filename, dialect):
     from .dialect import util as dialect_util
     dialect = dialect_util.get_dialect_object(dialect)
-    compiler = dialect.compiler_instance()
-    return compiler(source, filename)
+    return dialect.compile(source, filename)
 
 #==============================================================================#
 class BaseCompiler(object):

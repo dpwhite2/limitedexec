@@ -47,6 +47,8 @@ class TransformImportsAst(ast.NodeTransformer):
                 keywords = []
             call = ast.Call(func=func, args=args, keywords=keywords, starargs=None, kwargs=None)
             expr = ast.Expr(value=call)
+            expr = ast.copy_location(expr, node)
+            ast.fix_missing_locations(expr)
             exprs.append(expr)
         return exprs
     
@@ -65,7 +67,10 @@ class TransformImportsAst(ast.NodeTransformer):
         args = [ast.Str(s=modname)]
         keywords = [ast.keyword(arg='froms', value=froms)]
         call = ast.Call(func=func, args=args, keywords=keywords, starargs=None, kwargs=None)
-        return [ast.Expr(value=call)]
+        expr = ast.Expr(value=call)
+        expr = ast.copy_location(expr, node)
+        ast.fix_missing_locations(expr)
+        return [expr]
         
 
 

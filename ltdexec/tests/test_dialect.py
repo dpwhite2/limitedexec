@@ -228,3 +228,20 @@ class CustomDialect_TestCase(LtdExec_TestCaseBase):
             mydialect.allow_statement_def = True
 
 #==============================================================================#
+class DialectUtil_TestCase(LtdExec_TestCaseBase):
+    def test_get_dialect_object_by_class(self):
+        from ltdexec.dialect import util
+        obj = util.get_dialect_object(Dialect)
+        self.assertEquals(Dialect(), obj)
+        
+    def test_get_dialect_object_by_obj(self):
+        from ltdexec.dialect import util
+        obj = util.get_dialect_object(Dialect())
+        self.assertEquals(Dialect(), obj)
+        
+    def test_get_dialect_object_by_name(self):
+        from ltdexec.dialect import util
+        obj = util.get_dialect_object('ltdexec.dialect.base.Dialect')
+        self.assertEquals(Dialect(), obj)
+
+#==============================================================================#
