@@ -82,13 +82,13 @@ def wrap_class(readable_attrs=None, writable_attrs=None,
     def _inner(cls):
         assert isinstance(cls, WrapperBase)
         if readable_attrs is not None:
-            cls._LX_readable_attrs = readable_attrs
+            cls._LX_readable_attrs = frozenset(readable_attrs)
         if writable_attrs is not None:
-            cls._LX_writable_attrs = writable_attrs
+            cls._LX_writable_attrs = frozenset(writable_attrs)
         if unreadable_attrs is not None:
-            cls._LX_unreadable_attrs = unreadable_attrs
+            cls._LX_unreadable_attrs = frozenset(unreadable_attrs)
         if unwritable_attrs is not None:
-            cls._LX_unwritable_attrs = unwritable_attrs
+            cls._LX_unwritable_attrs = frozenset(unwritable_attrs)
             
         cls._LX_readable_attrs = cls._LX_readable_attrs | cls._LX_writable_attrs
         cls._LX_unwritable_attrs = cls._LX_unreadable_attrs | cls._LX_unwritable_attrs

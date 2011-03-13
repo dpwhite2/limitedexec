@@ -14,6 +14,7 @@ RUNNER = '_runtest.py'
 RUNNER_FILEPATH =   os.path.join(FUNCTESTS_PATH, RUNNER)
 
 MAXWAIT_TIME = 5.0
+POLL_INTERVAL = 0.01
 
 def init_tests():
     pypath = os.environ.get('PYTHONPATH','')
@@ -69,7 +70,7 @@ class Test(object):
         while proc.poll() is None:
             if time.time()-start > timeout:
                 break
-            time.sleep(0.1)
+            time.sleep(POLL_INTERVAL)
         if proc.poll() is None:
             print 'terminating test {0}'.format(self.name)
             proc.terminate()
